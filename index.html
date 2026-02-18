@@ -4,624 +4,842 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Absensi</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* ── M3 EXPRESSIVE COLOR SCHEME: Pink-Purple ── */
 :root {
-  --pink:    #e8a0bf;
-  --pink-d:  #d4789f;
-  --purple:  #c4a8e0;
-  --purple-d:#a87fc8;
-  --bg:      #fefcff;
-  --surface: #ffffff;
-  --border:  #f0e6f6;
-  --text:    #3a2a4a;
-  --muted:   #b89ccc;
-  --hadir:   #a8d4b8;
-  --lembur:  #e8a0bf;
-  --libur:   #a8c4e8;
-  --cuti:    #c4a8e0;
-  --red:     #e06080;
+  /* Primary: Pink */
+  --md-primary:           #8B4A6B;
+  --md-on-primary:        #FFFFFF;
+  --md-primary-container: #FFD8EC;
+  --md-on-primary-container: #3A0028;
+
+  /* Secondary: Mauve */
+  --md-secondary:           #6D5B67;
+  --md-on-secondary:        #FFFFFF;
+  --md-secondary-container: #F7DBF0;
+  --md-on-secondary-container: #261A24;
+
+  /* Tertiary: Purple */
+  --md-tertiary:           #7B5495;
+  --md-on-tertiary:        #FFFFFF;
+  --md-tertiary-container: #EEDCFF;
+  --md-on-tertiary-container: #2E0052;
+
+  /* Surface system */
+  --md-background:   #FFF8F9;
+  --md-surface:      #FFF8F9;
+  --md-surface-dim:  #E8D5DC;
+  --md-surface-bright: #FFF8F9;
+  --md-surface-container-lowest:  #FFFFFF;
+  --md-surface-container-low:     #FDF0F5;
+  --md-surface-container:         #F7EAF0;
+  --md-surface-container-high:    #F1E4EB;
+  --md-surface-container-highest: #EBE0E6;
+  --md-on-surface:        #201A1E;
+  --md-on-surface-variant: #524347;
+  --md-outline:           #857278;
+  --md-outline-variant:   #D8C2C9;
+
+  /* Status colors */
+  --c-hadir:  #386A20;
+  --c-hadir-bg: #C6EDA5;
+  --c-lembur:   #8B4A6B;
+  --c-lembur-bg: #FFD8EC;
+  --c-libur:  #1B61A4;
+  --c-libur-bg: #D3E4FF;
+  --c-cuti:   #7B5495;
+  --c-cuti-bg: #EEDCFF;
+
+  /* Shape */
+  --shape-xs:   4px;
+  --shape-sm:   8px;
+  --shape-md:   12px;
+  --shape-lg:   16px;
+  --shape-xl:   28px;
+  --shape-full: 999px;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  background: var(--md-background);
+  color: var(--md-on-surface);
   min-height: 100vh;
-  background-image:
-    radial-gradient(ellipse at 0% 0%, rgba(232,160,191,0.15) 0%, transparent 60%),
-    radial-gradient(ellipse at 100% 100%, rgba(196,168,224,0.15) 0%, transparent 60%);
 }
 
-/* AUTH */
+/* ── AUTH ── */
 #auth-screen {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1.5rem;
+  background: var(--md-surface-container-low);
 }
 
-.auth-wrap { width: 100%; max-width: 400px; }
+.auth-wrap { width: 100%; max-width: 420px; }
 
-.auth-logo { text-align: center; margin-bottom: 2.5rem; }
+.auth-logo { text-align: center; margin-bottom: 2rem; }
+
+.auth-icon {
+  width: 80px; height: 80px;
+  border-radius: var(--shape-xl);
+  background: var(--md-primary-container);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.25rem;
+  font-size: 2rem;
+}
 
 .auth-logo h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.8rem;
+  font-family: 'Google Sans Display', 'Google Sans', sans-serif;
+  font-size: 2rem;
   font-weight: 400;
-  background: linear-gradient(135deg, var(--pink-d), var(--purple-d));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--md-on-surface);
+  letter-spacing: -0.01em;
 }
 
 .auth-logo p {
-  font-size: 0.75rem;
-  color: var(--muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-top: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--md-on-surface-variant);
+  margin-top: 0.3rem;
+  font-weight: 400;
 }
 
+/* M3 Card */
 .auth-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 24px;
-  padding: 2.5rem;
-  box-shadow: 0 8px 40px rgba(196,168,224,0.12);
+  background: var(--md-surface-container-lowest);
+  border-radius: var(--shape-xl);
+  padding: 2rem;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.06),
+    0 2px 6px rgba(0,0,0,0.06),
+    0 0 0 1px rgba(139,74,107,0.06);
 }
 
-.form-group { margin-bottom: 1.1rem; }
-
-.form-group label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.45rem;
+.form-section-title {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--md-on-surface);
+  margin-bottom: 1.5rem;
 }
 
-.form-group input {
+/* M3 Outlined Text Field */
+.m3-field { position: relative; margin-bottom: 1rem; }
+
+.m3-field input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.9rem;
-  color: var(--text);
+  padding: 1rem 1rem 0.75rem;
+  padding-top: 1.25rem;
+  background: transparent;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--shape-sm);
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: var(--md-on-surface);
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.15s, border-width 0.15s;
 }
 
-.form-group input:focus {
-  border-color: var(--pink);
-  box-shadow: 0 0 0 4px rgba(232,160,191,0.1);
+.m3-field input:focus {
+  border-color: var(--md-primary);
+  border-width: 2px;
 }
 
-.btn-primary {
+.m3-field label {
+  position: absolute;
+  top: 50%; left: 1rem;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--md-on-surface-variant);
+  pointer-events: none;
+  transition: all 0.15s ease;
+  background: var(--md-surface-container-lowest);
+  padding: 0 4px;
+}
+
+.m3-field input:focus + label,
+.m3-field input:not(:placeholder-shown) + label {
+  top: 0;
+  font-size: 0.75rem;
+  color: var(--md-primary);
+}
+
+/* M3 Filled Button */
+.btn-filled {
   width: 100%;
-  padding: 0.85rem;
-  background: linear-gradient(135deg, var(--pink-d), var(--purple-d));
-  color: white;
+  padding: 0.75rem 1.5rem;
+  height: 40px;
+  background: var(--md-primary);
+  color: var(--md-on-primary);
   border: none;
-  border-radius: 12px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
+  border-radius: var(--shape-full);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.00625em;
   cursor: pointer;
-  margin-top: 0.5rem;
-  box-shadow: 0 4px 16px rgba(212,120,159,0.3);
-  transition: opacity 0.2s, transform 0.1s;
+  transition: box-shadow 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1.5rem;
 }
 
-.btn-primary:hover { opacity: 0.88; }
-.btn-primary:active { transform: scale(0.99); }
+.btn-filled:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.1); }
+.btn-filled:active { opacity: 0.92; }
 
-.btn-ghost {
+/* M3 Text Button */
+.btn-text {
   width: 100%;
   padding: 0.75rem;
   background: transparent;
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.83rem;
-  color: var(--muted);
+  color: var(--md-primary);
+  border: none;
+  border-radius: var(--shape-full);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  margin-top: 0.6rem;
-  transition: border-color 0.2s, color 0.2s;
+  transition: background 0.15s;
+  margin-top: 0.25rem;
 }
 
-.btn-ghost:hover { border-color: var(--pink); color: var(--pink-d); }
+.btn-text:hover { background: rgba(139,74,107,0.08); }
 
 .auth-msg {
-  font-size: 0.78rem;
-  margin-top: 0.9rem;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--shape-sm);
+  margin-top: 0.75rem;
   display: none;
   text-align: center;
 }
 
-/* APP */
+.auth-msg.err { background: #FFDAD6; color: #410002; }
+.auth-msg.ok  { background: var(--c-hadir-bg); color: var(--c-hadir); }
+
+/* ── APP ── */
 #app { display: none; }
 
+/* M3 Top App Bar */
 header {
+  background: var(--md-surface-container);
+  padding: 0 1.5rem;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background: rgba(254,252,255,0.9);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: sticky; top: 0; z-index: 100;
 }
 
-.logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
+.app-bar-title {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 1.375rem;
   font-weight: 400;
-  background: linear-gradient(135deg, var(--pink-d), var(--purple-d));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--md-on-surface);
+  display: flex; align-items: center; gap: 0.5rem;
 }
 
-.header-right { display: flex; align-items: center; gap: 1rem; }
+.app-bar-right { display: flex; align-items: center; gap: 0.75rem; }
 
-.user-chip {
-  font-size: 0.7rem;
-  color: var(--muted);
-  padding: 0.3rem 0.8rem;
-  background: var(--border);
-  border-radius: 20px;
-}
-
-.btn-out {
-  font-size: 0.75rem;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  color: var(--muted);
-  background: transparent;
-  border: 1.5px solid var(--border);
-  border-radius: 20px;
+.user-pill {
   padding: 0.3rem 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  border-radius: var(--shape-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  max-width: 180px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-.btn-out:hover { border-color: var(--red); color: var(--red); }
+/* M3 Icon Button */
+.btn-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--shape-full);
+  background: transparent;
+  border: none;
+  color: var(--md-on-surface-variant);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  font-family: 'Roboto', sans-serif;
+  transition: background 0.15s;
+}
 
-/* LAYOUT */
+.btn-icon:hover { background: rgba(82,67,71,0.08); }
+
+.btn-icon-outlined {
+  width: 40px; height: 40px;
+  border-radius: var(--shape-full);
+  background: transparent;
+  border: 1px solid var(--md-outline-variant);
+  color: var(--md-on-surface-variant);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.15s;
+}
+
+.btn-icon-outlined:hover {
+  background: rgba(139,74,107,0.08);
+  border-color: var(--md-primary);
+  color: var(--md-primary);
+}
+
+/* ── LAYOUT ── */
 .layout {
-  max-width: 1100px;
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1.5rem 3rem;
   display: grid;
-  grid-template-columns: 1fr 270px;
-  gap: 2rem;
+  grid-template-columns: 1fr 288px;
+  gap: 1.5rem;
   align-items: start;
 }
 
-/* CALENDAR */
-.cal-header {
+/* ── CALENDAR SECTION ── */
+.cal-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.2rem;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.period-label {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.25rem;
-  font-weight: 400;
-  color: var(--text);
+.period-display {
+  flex: 1;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--md-on-surface);
+  text-align: center;
 }
 
-.nav-btn {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(196,168,224,0.1);
+/* M3 Card (Filled) */
+.cal-card {
+  background: var(--md-surface-container-lowest);
+  border-radius: var(--shape-xl);
+  padding: 1.25rem;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.05),
+    0 1px 4px rgba(0,0,0,0.05);
 }
 
-.nav-btn:hover { border-color: var(--pink); color: var(--pink-d); }
-
-.cal-box {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 24px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 24px rgba(196,168,224,0.08);
-}
-
-.day-names {
+.day-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
-.day-name {
+.day-hdr {
   text-align: center;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 0.4rem 0;
+  padding: 0.5rem 0;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--md-on-surface-variant);
 }
 
-.day-name.we { color: var(--pink-d); }
+.day-hdr.we { color: var(--md-primary); }
 
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  gap: 2px;
 }
 
+/* M3 Date Cell */
 .cal-cell {
   aspect-ratio: 1;
-  border-radius: 50%;
+  border-radius: var(--shape-full);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: all 0.15s;
+  transition: background 0.15s;
   user-select: none;
   position: relative;
 }
 
-.cal-cell:hover:not(.empty) { background: var(--border); border-color: var(--pink); }
-.cal-cell.empty { cursor: default; opacity: 0; pointer-events: none; }
-.cal-cell.today { border-color: var(--pink-d) !important; background: rgba(232,160,191,0.08); }
-.cal-cell.weekend .cal-date { color: var(--pink); }
+.cal-cell:hover:not(.empty) {
+  background: rgba(139,74,107,0.08);
+}
 
-.cal-date { font-size: 0.8rem; font-weight: 400; line-height: 1; text-align: center; }
+.cal-cell.empty { pointer-events: none; }
+.cal-cell.weekend .cal-date { color: var(--md-primary); opacity: 0.7; }
 
-.month-tag {
-  font-size: 0.46rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+/* M3 Today = filled tonal */
+.cal-cell.today {
+  background: var(--md-secondary-container);
+}
+
+.cal-cell.today .cal-date { color: var(--md-on-secondary-container); font-weight: 600; }
+
+.cal-date {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--md-on-surface);
+  text-align: center;
+}
+
+.month-badge {
+  font-size: 0.45rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--pink-d);
+  color: var(--md-primary);
   line-height: 1;
   margin-bottom: 1px;
 }
 
 .cal-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 2px; }
 
-.cal-cell.hadir  { background: rgba(168,212,184,0.25); border-color: rgba(168,212,184,0.6); }
-.cal-cell.lembur { background: rgba(232,160,191,0.22); border-color: rgba(232,160,191,0.6); }
-.cal-cell.libur  { background: rgba(168,196,232,0.22); border-color: rgba(168,196,232,0.6); }
-.cal-cell.cuti   { background: rgba(196,168,224,0.22); border-color: rgba(196,168,224,0.6); }
+/* M3 Status: Tonal containers */
+.cal-cell.hadir  { background: var(--c-hadir-bg); }
+.cal-cell.lembur { background: var(--c-lembur-bg); }
+.cal-cell.libur  { background: var(--c-libur-bg); }
+.cal-cell.cuti   { background: var(--c-cuti-bg); }
 
-.cal-cell.hadir  .cal-date { color: #5a9e78; }
-.cal-cell.lembur .cal-date { color: var(--pink-d); }
-.cal-cell.libur  .cal-date { color: #5a82b4; }
-.cal-cell.cuti   .cal-date { color: var(--purple-d); }
+.cal-cell.hadir  .cal-date { color: var(--c-hadir); font-weight: 500; }
+.cal-cell.lembur .cal-date { color: var(--c-lembur); font-weight: 500; }
+.cal-cell.libur  .cal-date { color: var(--c-libur); font-weight: 500; }
+.cal-cell.cuti   .cal-date { color: var(--c-cuti); font-weight: 500; }
 
-.cal-cell.hadir  .cal-dot { background: #5a9e78; }
-.cal-cell.lembur .cal-dot { background: var(--pink-d); }
-.cal-cell.libur  .cal-dot { background: #5a82b4; }
-.cal-cell.cuti   .cal-dot { background: var(--purple-d); }
+.cal-cell.hadir  .cal-dot { background: var(--c-hadir); }
+.cal-cell.lembur .cal-dot { background: var(--c-lembur); }
+.cal-cell.libur  .cal-dot { background: var(--c-libur); }
+.cal-cell.cuti   .cal-dot { background: var(--c-cuti); }
 
-/* SIDEBAR */
+.cal-cell.hadir:hover  { background: #B2DBA0; }
+.cal-cell.lembur:hover { background: #F7C4DC; }
+.cal-cell.libur:hover  { background: #C0D4F5; }
+.cal-cell.cuti:hover   { background: #E0CCFF; }
+
+/* ── SIDEBAR ── */
 .sidebar { display: flex; flex-direction: column; gap: 1rem; }
 
-.period-chip {
-  background: linear-gradient(135deg, rgba(232,160,191,0.1), rgba(196,168,224,0.1));
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
-  padding: 1rem 1.25rem;
+/* M3 Filled Card */
+.period-card {
+  background: var(--md-primary-container);
+  border-radius: var(--shape-xl);
+  padding: 1.25rem 1.5rem;
 }
 
-.chip-label {
-  font-size: 0.6rem;
-  font-weight: 600;
+.period-card .label {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--muted);
+  color: var(--md-on-primary-container);
+  opacity: 0.7;
+  margin-bottom: 0.35rem;
+}
+
+.period-card .value {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--md-on-primary-container);
+}
+
+/* M3 Stat Grid */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.stat-card {
+  border-radius: var(--shape-lg);
+  padding: 1rem 1.1rem 0.9rem;
+  transition: box-shadow 0.15s;
+  cursor: default;
+}
+
+.stat-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stat-card.c-hadir  { background: var(--c-hadir-bg); }
+.stat-card.c-lembur { background: var(--c-lembur-bg); }
+.stat-card.c-libur  { background: var(--c-libur-bg); }
+.stat-card.c-cuti   { background: var(--c-cuti-bg); }
+
+.s-label {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   margin-bottom: 0.3rem;
 }
 
-.chip-val {
-  font-family: 'Playfair Display', serif;
-  font-size: 1rem;
-  color: var(--pink-d);
+.s-val {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 1;
 }
 
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.s-unit { font-size: 0.6875rem; opacity: 0.7; margin-top: 0.1rem; }
 
-.stat-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
-  padding: 1rem 1rem 0.85rem;
-  box-shadow: 0 2px 12px rgba(196,168,224,0.07);
-  transition: transform 0.2s;
+.stat-card.c-hadir  .s-label,
+.stat-card.c-hadir  .s-unit  { color: var(--c-hadir); }
+.stat-card.c-hadir  .s-val   { color: var(--c-hadir); }
+
+.stat-card.c-lembur .s-label,
+.stat-card.c-lembur .s-unit  { color: var(--c-lembur); }
+.stat-card.c-lembur .s-val   { color: var(--c-lembur); }
+
+.stat-card.c-libur  .s-label,
+.stat-card.c-libur  .s-unit  { color: var(--c-libur); }
+.stat-card.c-libur  .s-val   { color: var(--c-libur); }
+
+.stat-card.c-cuti   .s-label,
+.stat-card.c-cuti   .s-unit  { color: var(--c-cuti); }
+.stat-card.c-cuti   .s-val   { color: var(--c-cuti); }
+
+/* M3 Legend Card */
+.legend-card {
+  background: var(--md-surface-container-lowest);
+  border-radius: var(--shape-xl);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.stat-card:hover { transform: translateY(-2px); }
-.stat-lbl { font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.3rem; }
-.stat-val { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 400; line-height: 1; }
-.stat-unit { font-size: 0.6rem; color: var(--muted); margin-top: 0.15rem; }
+.legend-title {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+  margin-bottom: 0.9rem;
+}
 
-.c-hadir  .stat-val { color: #5a9e78; }
-.c-lembur .stat-val { color: var(--pink-d); }
-.c-libur  .stat-val { color: #5a82b4; }
-.c-cuti   .stat-val { color: var(--purple-d); }
+.leg-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.3rem 0;
+  font-size: 0.8125rem;
+  color: var(--md-on-surface);
+}
 
-.legend-box {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
+.leg-chip {
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--shape-full);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  display: flex; align-items: center;
+  white-space: nowrap;
+}
+
+/* M3 Info Card */
+.info-card {
+  background: var(--md-secondary-container);
+  border-radius: var(--shape-xl);
   padding: 1rem 1.25rem;
 }
 
-.legend-box .leg-title { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 0.75rem; }
-
-.leg-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.78rem; color: var(--text); margin-bottom: 0.45rem; }
-.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
-.tip-box {
-  background: linear-gradient(135deg, rgba(232,160,191,0.06), rgba(196,168,224,0.06));
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
-  padding: 0.9rem 1.1rem;
-  font-size: 0.74rem;
-  color: var(--muted);
-  line-height: 1.65;
+.info-card p {
+  font-size: 0.8125rem;
+  color: var(--md-on-secondary-container);
+  line-height: 1.6;
 }
 
-.tip-box strong { color: var(--pink-d); font-weight: 600; }
-
-/* CONTEXT MENU */
+/* ── M3 MENU (Context Menu) ── */
 .ctx-menu {
   position: fixed;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 18px;
+  background: var(--md-surface-container);
+  border-radius: var(--shape-xl);
   z-index: 1000;
-  min-width: 190px;
+  min-width: 200px;
   display: none;
-  box-shadow: 0 12px 40px rgba(196,168,224,0.2);
-  padding: 6px;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.12),
+    0 8px 24px rgba(0,0,0,0.08),
+    0 16px 40px rgba(0,0,0,0.06);
+  padding: 0.5rem;
+  overflow: hidden;
 }
 
-.ctx-menu.show { display: block; animation: popIn 0.14s ease; }
+.ctx-menu.show { display: block; animation: mdMenuIn 0.2s cubic-bezier(0.2, 0, 0, 1); }
 
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.94) translateY(-4px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes mdMenuIn {
+  from { opacity: 0; transform: scale(0.92) translateY(-6px); clip-path: inset(0 0 100% 0 round 28px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); clip-path: inset(0 0 0 0 round 28px); }
 }
 
 .ctx-item {
-  display: flex; align-items: center; gap: 0.65rem;
-  padding: 0.65rem 0.9rem;
-  font-size: 0.83rem;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  color: var(--text);
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  font-family: 'Roboto', sans-serif;
+  color: var(--md-on-surface);
   cursor: pointer;
   border-radius: 12px;
-  transition: background 0.12s;
+  transition: background 0.1s;
+  user-select: none;
 }
 
-.ctx-item:hover { background: var(--border); }
-.ctx-icon { font-size: 0.85rem; width: 18px; text-align: center; }
-.ctx-div { height: 1px; background: var(--border); margin: 4px 2px; }
-.ctx-item.danger { color: var(--red); }
-.ctx-item.danger:hover { background: rgba(224,96,128,0.08); }
+.ctx-item:hover { background: rgba(139,74,107,0.1); }
 
-/* TOAST */
+.ctx-lead {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.ctx-div { height: 1px; background: var(--md-outline-variant); margin: 4px 8px; }
+.ctx-item.danger { color: #B3261E; }
+.ctx-item.danger:hover { background: rgba(179,38,30,0.08); }
+.ctx-item.danger .ctx-lead { background: #FFDAD6; }
+
+/* ── M3 SNACKBAR (Toast) ── */
 .toast {
   position: fixed;
-  bottom: 2rem; left: 50%;
-  transform: translateX(-50%) translateY(5rem);
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 20px;
-  padding: 0.65rem 1.4rem;
-  font-size: 0.8rem;
-  color: var(--text);
-  box-shadow: 0 8px 32px rgba(196,168,224,0.18);
+  bottom: 1.5rem; left: 50%;
+  transform: translateX(-50%) translateY(6rem);
+  background: #1C1B1F;
+  color: #E6E1E5;
+  border-radius: var(--shape-sm);
+  padding: 0.875rem 1.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
   z-index: 9999;
   white-space: nowrap;
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.3s cubic-bezier(0.2,0,0,1);
+  min-width: 200px;
+  text-align: center;
 }
 
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* DEBUG */
+/* ── DEBUG ── */
 #debug-toggle {
-  position: fixed; bottom: 1.5rem; right: 1.5rem;
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  color: var(--muted);
-  cursor: pointer; font-size: 0.95rem;
+  position: fixed; bottom: 1rem; right: 1rem;
+  width: 40px; height: 40px;
+  border-radius: var(--shape-full);
+  background: var(--md-surface-container-high);
+  border: none;
+  color: var(--md-on-surface-variant);
+  cursor: pointer; font-size: 1rem;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 12px rgba(196,168,224,0.15);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
   z-index: 9998;
-  transition: all 0.2s;
+  transition: box-shadow 0.2s;
 }
 
-#debug-toggle:hover { border-color: var(--pink); color: var(--pink-d); }
+#debug-toggle:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.16); }
 
 #debug-panel {
   display: none;
-  position: fixed; bottom: 4.5rem; right: 1rem;
+  position: fixed; bottom: 4rem; right: 1rem;
   width: min(380px,95vw); max-height: 280px; overflow-y: auto;
-  background: #1e1428;
-  border: 1.5px solid #3a2a4a;
-  border-radius: 16px;
-  padding: 0.75rem 1rem;
+  background: #1C1428;
+  border-radius: var(--shape-xl);
+  padding: 1rem;
   font-family: monospace; font-size: 0.68rem;
   z-index: 9997;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-@media (max-width: 720px) {
-  .layout { grid-template-columns: 1fr; padding: 1rem; gap: 1.25rem; }
-  .stat-grid { grid-template-columns: repeat(4,1fr); }
-  header { padding: 0.8rem 1rem; }
-  .user-chip { display: none; }
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .stat-grid { grid-template-columns: repeat(4, 1fr); }
+  header { padding: 0 1rem; }
+  .user-pill { display: none; }
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
-.cal-grid { animation: fadeUp 0.22s ease; }
+.cal-grid { animation: fadeUp 0.2s cubic-bezier(0.2,0,0,1); }
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
+<!-- ══ AUTH ══ -->
 <div id="auth-screen">
   <div class="auth-wrap">
     <div class="auth-logo">
+      <div class="auth-icon">🌸</div>
       <h1>Absensi</h1>
       <p>Rekap kehadiran harian</p>
     </div>
     <div class="auth-card">
+      <!-- Login -->
       <div id="login-form">
-        <div class="form-group">
+        <p class="form-section-title">Masuk</p>
+        <div class="m3-field">
+          <input type="email" id="email" placeholder=" " autocomplete="email">
           <label>Surel</label>
-          <input type="email" id="email" placeholder="nama@email.com" autocomplete="email">
         </div>
-        <div class="form-group">
+        <div class="m3-field">
+          <input type="password" id="password" placeholder=" " autocomplete="current-password">
           <label>Kata sandi</label>
-          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
         </div>
-        <button class="btn-primary" onclick="login()">Masuk</button>
-        <button class="btn-ghost" onclick="showRegister()">Belum punya akun? Daftar</button>
+        <button class="btn-filled" onclick="login()">Masuk</button>
+        <button class="btn-text" onclick="showRegister()">Belum punya akun? Daftar</button>
       </div>
+
+      <!-- Register -->
       <div id="register-form" style="display:none">
-        <div class="form-group">
+        <p class="form-section-title">Buat Akun</p>
+        <div class="m3-field">
+          <input type="email" id="reg-email" placeholder=" ">
           <label>Surel</label>
-          <input type="email" id="reg-email" placeholder="nama@email.com">
         </div>
-        <div class="form-group">
-          <label>Kata sandi</label>
-          <input type="password" id="reg-password" placeholder="Min. 6 karakter">
+        <div class="m3-field">
+          <input type="password" id="reg-password" placeholder=" ">
+          <label>Kata sandi (min. 6 karakter)</label>
         </div>
-        <button class="btn-primary" onclick="register()">Buat akun</button>
-        <button class="btn-ghost" onclick="showLogin()">Sudah punya akun? Masuk</button>
+        <button class="btn-filled" onclick="register()">Buat akun</button>
+        <button class="btn-text" onclick="showLogin()">Sudah punya akun? Masuk</button>
       </div>
+
       <div class="auth-msg" id="auth-msg"></div>
     </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══ APP ══ -->
 <div id="app">
   <header>
-    <div class="logo">✿ Absensi</div>
-    <div class="header-right">
-      <span class="user-chip" id="user-email-display"></span>
-      <button class="btn-out" onclick="logout()">Keluar</button>
+    <div class="app-bar-title">🌸 Absensi</div>
+    <div class="app-bar-right">
+      <span class="user-pill" id="user-email-display"></span>
+      <button class="btn-icon" onclick="logout()" title="Keluar">↩</button>
     </div>
   </header>
 
   <div class="layout">
+    <!-- Calendar -->
     <div>
-      <div class="cal-header">
-        <button class="nav-btn" onclick="changePeriode(-1)">←</button>
-        <div class="period-label" id="period-label">—</div>
-        <button class="nav-btn" onclick="changePeriode(1)">→</button>
+      <div class="cal-nav">
+        <button class="btn-icon-outlined" onclick="changePeriode(-1)">←</button>
+        <div class="period-display" id="period-label">—</div>
+        <button class="btn-icon-outlined" onclick="changePeriode(1)">→</button>
       </div>
-      <div class="cal-box">
-        <div class="day-names">
-          <div class="day-name we">Min</div>
-          <div class="day-name">Sen</div>
-          <div class="day-name">Sel</div>
-          <div class="day-name">Rab</div>
-          <div class="day-name">Kam</div>
-          <div class="day-name">Jum</div>
-          <div class="day-name we">Sab</div>
+      <div class="cal-card">
+        <div class="day-row">
+          <div class="day-hdr we">Min</div>
+          <div class="day-hdr">Sen</div>
+          <div class="day-hdr">Sel</div>
+          <div class="day-hdr">Rab</div>
+          <div class="day-hdr">Kam</div>
+          <div class="day-hdr">Jum</div>
+          <div class="day-hdr we">Sab</div>
         </div>
         <div class="cal-grid" id="cal-grid">
-          <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem">Memuat...</div>
+          <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--md-on-surface-variant);font-size:0.875rem">Memuat...</div>
         </div>
       </div>
     </div>
 
+    <!-- Sidebar -->
     <div class="sidebar">
-      <div class="period-chip">
-        <div class="chip-label">Periode Gaji</div>
-        <div class="chip-val" id="stat-periode">—</div>
+      <div class="period-card">
+        <div class="label">Periode Gaji</div>
+        <div class="value" id="stat-periode">—</div>
       </div>
 
       <div class="stat-grid">
         <div class="stat-card c-hadir">
-          <div class="stat-lbl">Masuk</div>
-          <div class="stat-val" id="stat-hadir">0</div>
-          <div class="stat-unit">hari</div>
+          <div class="s-label">Masuk</div>
+          <div class="s-val" id="stat-hadir">0</div>
+          <div class="s-unit">hari</div>
         </div>
         <div class="stat-card c-lembur">
-          <div class="stat-lbl">Lembur</div>
-          <div class="stat-val" id="stat-lembur">0</div>
-          <div class="stat-unit">kali</div>
+          <div class="s-label">Lembur</div>
+          <div class="s-val" id="stat-lembur">0</div>
+          <div class="s-unit">kali</div>
         </div>
         <div class="stat-card c-libur">
-          <div class="stat-lbl">Libur</div>
-          <div class="stat-val" id="stat-libur">0</div>
-          <div class="stat-unit">hari</div>
+          <div class="s-label">Libur</div>
+          <div class="s-val" id="stat-libur">0</div>
+          <div class="s-unit">hari</div>
         </div>
         <div class="stat-card c-cuti">
-          <div class="stat-lbl">Cuti</div>
-          <div class="stat-val" id="stat-cuti">0</div>
-          <div class="stat-unit">hari</div>
+          <div class="s-label">Cuti</div>
+          <div class="s-val" id="stat-cuti">0</div>
+          <div class="s-unit">hari</div>
         </div>
       </div>
 
-      <div class="legend-box">
-        <div class="leg-title">Keterangan</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#5a9e78"></div> Hadir Normal</div>
-        <div class="leg-item"><div class="leg-dot" style="background:var(--pink-d)"></div> Hadir + Lembur</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#5a82b4"></div> Libur Resmi</div>
-        <div class="leg-item"><div class="leg-dot" style="background:var(--purple-d)"></div> Izin / Cuti / Sakit</div>
+      <div class="legend-card">
+        <div class="legend-title">Keterangan</div>
+        <div class="leg-item">
+          <div class="leg-chip" style="background:var(--c-hadir-bg);color:var(--c-hadir)">Hadir</div>
+          Normal
+        </div>
+        <div class="leg-item">
+          <div class="leg-chip" style="background:var(--c-lembur-bg);color:var(--c-lembur)">Lembur</div>
+          Hadir + lembur
+        </div>
+        <div class="leg-item">
+          <div class="leg-chip" style="background:var(--c-libur-bg);color:var(--c-libur)">Libur</div>
+          Libur resmi
+        </div>
+        <div class="leg-item">
+          <div class="leg-chip" style="background:var(--c-cuti-bg);color:var(--c-cuti)">Cuti</div>
+          Izin/cuti/sakit
+        </div>
       </div>
 
-      <div class="tip-box">
-        <strong>Cara pakai</strong><br>
-        Ketuk tanggal untuk memilih status. Periode dihitung dari tgl 16 s/d 15 bulan berikutnya.
+      <div class="info-card">
+        <p>Ketuk tanggal untuk memilih status. Periode dihitung dari tgl <strong>16 s/d 15</strong> bulan berikutnya.</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Context Menu -->
+<!-- M3 Menu -->
 <div class="ctx-menu" id="ctx-menu">
-  <div class="ctx-item" onclick="setStatus('hadir')"><span class="ctx-icon" style="color:#5a9e78">✓</span> Hadir Normal</div>
-  <div class="ctx-item" onclick="setStatus('lembur')"><span class="ctx-icon" style="color:var(--pink-d)">⏰</span> Hadir + Lembur</div>
+  <div class="ctx-item" onclick="setStatus('hadir')">
+    <div class="ctx-lead" style="background:var(--c-hadir-bg);color:var(--c-hadir)">✓</div>
+    Hadir Normal
+  </div>
+  <div class="ctx-item" onclick="setStatus('lembur')">
+    <div class="ctx-lead" style="background:var(--c-lembur-bg);color:var(--c-lembur)">⏰</div>
+    Hadir + Lembur
+  </div>
   <div class="ctx-div"></div>
-  <div class="ctx-item" onclick="setStatus('libur')"><span class="ctx-icon" style="color:#5a82b4">✦</span> Libur Resmi</div>
-  <div class="ctx-item" onclick="setStatus('cuti')"><span class="ctx-icon" style="color:var(--purple-d)">✦</span> Izin / Cuti / Sakit</div>
+  <div class="ctx-item" onclick="setStatus('libur')">
+    <div class="ctx-lead" style="background:var(--c-libur-bg);color:var(--c-libur)">✦</div>
+    Libur Resmi
+  </div>
+  <div class="ctx-item" onclick="setStatus('cuti')">
+    <div class="ctx-lead" style="background:var(--c-cuti-bg);color:var(--c-cuti)">✦</div>
+    Izin / Cuti / Sakit
+  </div>
   <div class="ctx-div"></div>
-  <div class="ctx-item danger" onclick="setStatus(null)"><span class="ctx-icon">✕</span> Hapus Tanda</div>
+  <div class="ctx-item danger" onclick="setStatus(null)">
+    <div class="ctx-lead">✕</div>
+    Hapus Tanda
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <button id="debug-toggle" onclick="toggleDebug()">🐛</button>
 <div id="debug-panel">
-  <div style="color:var(--pink);font-size:0.6rem;letter-spacing:0.15em;margin-bottom:6px">DEBUG LOG ✿</div>
-  <div id="debug-log" style="color:#b89ccc;font-size:0.65rem">Belum ada log.</div>
+  <div style="color:#FFB3C9;font-size:0.65rem;letter-spacing:0.1em;margin-bottom:8px;font-family:'Google Sans',sans-serif">DEBUG</div>
+  <div id="debug-log" style="color:#D0BCFF;font-size:0.65rem">Belum ada log.</div>
 </div>
 
 <script>
@@ -631,12 +849,12 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-let currentUser  = null
-let currentDate  = new Date()
+let currentUser    = null
+let currentDate    = new Date()
 let attendanceData = {}
-let selectedDate = null
+let selectedDate   = null
 
-// DEBUG
+// ── DEBUG ──
 const logs = []
 function dbg(level, ctx, msg, detail) {
   const t = new Date().toLocaleTimeString('id-ID')
@@ -644,12 +862,12 @@ function dbg(level, ctx, msg, detail) {
   if (logs.length > 50) logs.pop()
   const el = document.getElementById('debug-log')
   if (!el) return
-  const c = { INFO:'#a8d4b8', WARN:'#e8c880', ERROR:'#e8a0a0' }
+  const c = { INFO:'#C6EDA5', WARN:'#F9E2A0', ERROR:'#FFB4AB' }
   el.innerHTML = logs.slice(0,15).map(e =>
-    `<div style="border-bottom:1px solid #3a2a4a;padding:3px 0;color:${c[e.level]||'#b89ccc'}">
-      <span style="color:#6a4a7a">${e.t}</span>
-      <span style="color:#e8e0f0"> [${e.ctx}]</span> ${e.msg}
-      ${e.detail ? `<div style="color:#6a4a7a;word-break:break-all;padding-left:8px">${JSON.stringify(e.detail)}</div>` : ''}
+    `<div style="border-bottom:1px solid #3a2a4a;padding:3px 0;color:${c[e.level]||'#D0BCFF'}">
+      <span style="color:#7a5a8a">${e.t}</span>
+      <span style="color:#EDE0FF"> [${e.ctx}]</span> ${e.msg}
+      ${e.detail ? `<div style="color:#7a5a8a;word-break:break-all;padding-left:8px">${JSON.stringify(e.detail)}</div>` : ''}
     </div>`
   ).join('')
 }
@@ -662,7 +880,7 @@ function toggleDebug() {
   b.textContent = open ? '🐛' : '✕'
 }
 
-// AUTH
+// ── AUTH ──
 async function login() {
   const email = document.getElementById('email').value.trim()
   const pw    = document.getElementById('password').value
@@ -706,7 +924,7 @@ function showLogin() {
 function showMsg(msg, ok) {
   const el = document.getElementById('auth-msg')
   el.textContent = msg
-  el.style.color = ok ? '#5a9e78' : 'var(--red)'
+  el.className = 'auth-msg ' + (ok ? 'ok' : 'err')
   el.style.display = 'block'
 }
 
@@ -722,14 +940,14 @@ function onLogin(user) {
   loadAttendance()
 }
 
-// PERIODE
+// ── PERIODE ──
 function getPeriode() {
   const y = currentDate.getFullYear()
   const m = currentDate.getMonth()
   return { start: new Date(y, m, 16), end: new Date(y, m+1, 15) }
 }
 
-// DATABASE
+// ── DATABASE ──
 async function loadAttendance() {
   const { start, end } = getPeriode()
   const from = start.toLocaleDateString('sv-SE')
@@ -764,7 +982,7 @@ async function saveAttendance(dateStr, status) {
   updateStats()
 }
 
-// CALENDAR
+// ── CALENDAR ──
 const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
 
 function renderCalendar() {
@@ -776,6 +994,7 @@ function renderCalendar() {
   const grid = document.getElementById('cal-grid')
   grid.innerHTML = ''
 
+  // Padding cells
   for (let i = 0; i < start.getDay(); i++) {
     const e = document.createElement('div')
     e.className = 'cal-cell empty'
@@ -794,11 +1013,11 @@ function renderCalendar() {
     const status  = attendanceData[dateStr]
 
     const cell = document.createElement('div')
-    cell.className = `cal-cell${isWE?' weekend':''}${isToday?' today':''}${status?' '+status:''}`
+    cell.className = `cal-cell${isWE?' weekend':''}${isToday&&!status?' today':''}${status?' '+status:''}`
 
-    const monthTag = d === 1 ? `<div class="month-tag">${MN[m]}</div>` : ''
-    const dot = status ? `<div class="cal-dot"></div>` : ''
-    cell.innerHTML = `${monthTag}<span class="cal-date">${d}</span>${dot}`
+    const badge = d === 1 ? `<div class="month-badge">${MN[m]}</div>` : ''
+    const dot   = status ? `<div class="cal-dot"></div>` : ''
+    cell.innerHTML = `${badge}<span class="cal-date">${d}</span>${dot}`
 
     cell.addEventListener('click', e => { e.stopPropagation(); openMenu(e, dateStr) })
     cell.addEventListener('contextmenu', e => { e.preventDefault(); openMenu(e, dateStr) })
@@ -812,16 +1031,10 @@ function renderCalendar() {
 
 function updateStats() {
   const vals = Object.values(attendanceData)
-  const hadir  = vals.filter(v => v==='hadir').length
-  const lembur = vals.filter(v => v==='lembur').length
-  const libur  = vals.filter(v => v==='libur').length
-  const cuti   = vals.filter(v => v==='cuti').length
-
-  document.getElementById('stat-hadir').textContent  = hadir + lembur
-  document.getElementById('stat-lembur').textContent = lembur
-  document.getElementById('stat-libur').textContent  = libur
-  document.getElementById('stat-cuti').textContent   = cuti
-
+  document.getElementById('stat-hadir').textContent  = vals.filter(v=>v==='hadir').length + vals.filter(v=>v==='lembur').length
+  document.getElementById('stat-lembur').textContent = vals.filter(v=>v==='lembur').length
+  document.getElementById('stat-libur').textContent  = vals.filter(v=>v==='libur').length
+  document.getElementById('stat-cuti').textContent   = vals.filter(v=>v==='cuti').length
   const { start, end } = getPeriode()
   document.getElementById('stat-periode').textContent =
     `${start.getDate()} ${MN[start.getMonth()]} — ${end.getDate()} ${MN[end.getMonth()]} ${end.getFullYear()}`
@@ -834,15 +1047,15 @@ async function changePeriode(dir) {
   await loadAttendance()
 }
 
-// CONTEXT MENU
+// ── CONTEXT MENU ──
 function openMenu(e, dateStr) {
   e.preventDefault()
   selectedDate = dateStr
   const menu = document.getElementById('ctx-menu')
   menu.classList.add('show')
   let x = e.clientX, y = e.clientY
-  if (x + 200 > window.innerWidth)  x = window.innerWidth - 205
-  if (y + 230 > window.innerHeight) y = window.innerHeight - 235
+  if (x + 210 > window.innerWidth)  x = window.innerWidth - 215
+  if (y + 240 > window.innerHeight) y = window.innerHeight - 245
   menu.style.left = x+'px'
   menu.style.top  = y+'px'
 }
@@ -853,15 +1066,15 @@ async function setStatus(status) {
   if (!selectedDate) return
   closeMenu()
   await saveAttendance(selectedDate, status)
-  const labels = { hadir:'Ditandai: Hadir', lembur:'Ditandai: Lembur', libur:'Ditandai: Libur', cuti:'Ditandai: Cuti/Izin' }
-  showToast(status ? labels[status] : 'Tanda dihapus')
+  const labels = { hadir:'Hadir', lembur:'Hadir + Lembur', libur:'Libur Resmi', cuti:'Izin/Cuti/Sakit' }
+  showToast(status ? `Ditandai: ${labels[status]}` : 'Tanda dihapus')
 }
 
 document.addEventListener('click', e => {
   if (!document.getElementById('ctx-menu').contains(e.target)) closeMenu()
 })
 
-// TOAST
+// ── TOAST ──
 let toastTimer
 function showToast(msg) {
   const t = document.getElementById('toast')
@@ -871,7 +1084,7 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500)
 }
 
-// INIT
+// ── INIT ──
 db.auth.getSession().then(({ data: { session } }) => {
   if (session) onLogin(session.user)
 })
