@@ -551,6 +551,34 @@ header {
   line-height: 1.6;
 }
 
+/* Note Panel */
+.note-panel {
+  background: var(--c-cuti-bg);
+  border-radius: var(--shape-xl);
+  padding: 1rem 1.25rem;
+  animation: fadeUp 0.18s ease;
+}
+
+.note-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.note-panel-header::before {
+  content: '🤒';
+  font-size: 1rem;
+}
+
+.note-panel-body {
+  font-size: 0.875rem;
+  color: var(--c-cuti);
+  line-height: 1.55;
+  font-style: italic;
+  word-break: break-word;
+}
+
 /* ── M3 MENU (Context Menu) ── */
 .ctx-menu {
   position: fixed;
@@ -934,6 +962,13 @@ header {
         </div>
       </div>
 
+      <div class="note-panel" id="note-panel" style="display:none">
+        <div class="note-panel-header">
+          <span id="note-panel-date" style="font-family:'Google Sans',sans-serif;font-size:0.75rem;font-weight:500;color:var(--c-cuti)"></span>
+        </div>
+        <div class="note-panel-body" id="note-panel-body"></div>
+      </div>
+
       <div class="info-card">
         <p>Ketuk tanggal untuk memilih status. Periode dihitung dari tgl <strong>16 s/d 15</strong> bulan berikutnya.</p>
       </div>
@@ -1129,6 +1164,8 @@ async function saveAttendance(dateStr, status, note = '') {
   dbg('INFO','save','OK')
   renderCalendar()
   updateStats()
+  // Update note panel jika sedang menampilkan tanggal ini
+  if (typeof showNotePanel === 'function') showNotePanel(dateStr)
 }
 
 // ── CALENDAR ──
@@ -1172,7 +1209,7 @@ function renderCalendar() {
     cell.innerHTML = `${badge}<span class="cal-date">${d}</span>${dot}${noteDot}`
     if (note) cell.title = note
 
-    cell.addEventListener('click', e => { e.stopPropagation(); openMenu(e, dateStr) })
+    cell.addEventListener('click', e => { e.stopPropagation(); openMenu(e, dateStr); showNotePanel(dateStr) })
     cell.addEventListener('contextmenu', e => { e.preventDefault(); openMenu(e, dateStr) })
 
     grid.appendChild(cell)
@@ -1232,6 +1269,20 @@ function openMenu(e, dateStr) {
 
 function closeMenu() { document.getElementById('ctx-menu').classList.remove('show') }
 
+function showNotePanel(dateStr) {
+  const entry = attendanceData[dateStr]
+  const panel = document.getElementById('note-panel')
+  if (!entry || entry.status !== 'cuti' || !entry.note) {
+    panel.style.display = 'none'
+    return
+  }
+  const MN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+  const [y, m, d] = dateStr.split('-')
+  document.getElementById('note-panel-date').textContent = `${parseInt(d)} ${MN_FULL[parseInt(m)-1]} ${y}`
+  document.getElementById('note-panel-body').textContent = entry.note
+  panel.style.display = 'block'
+}
+
 // Reposition menu on scroll so it stays anchored to the cell
 document.addEventListener('scroll', () => {
   const menu = document.getElementById('ctx-menu')
@@ -1283,9 +1334,10 @@ function closeNoteDialog() {
 
 async function confirmCuti() {
   if (!pendingNoteDate) return
+  const dateToSave = pendingNoteDate   // simpan sebelum closeNoteDialog() menghapusnya
   const note = document.getElementById('note-input').value.trim()
   closeNoteDialog()
-  await saveAttendance(pendingNoteDate, 'cuti', note)
+  await saveAttendance(dateToSave, 'cuti', note)
   showToast('Ditandai: Izin/Cuti/Sakit')
 }
 
