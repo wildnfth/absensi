@@ -596,9 +596,9 @@
     <!-- CALENDAR -->
     <div>
       <div class="month-nav">
-        <button class="nav-btn" onclick="changeMonth(-1)">←</button>
+        <button class="nav-btn" onclick="changePeriode(-1)">←</button>
         <div class="month-label" id="month-label">—</div>
-        <button class="nav-btn" onclick="changeMonth(1)">→</button>
+        <button class="nav-btn" onclick="changePeriode(1)">→</button>
       </div>
       <div class="calendar-container">
         <div class="calendar-header">
@@ -813,13 +813,10 @@ function toggleDebug() {
 // DATABASE
 // ============================
 async function loadAttendance() {
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth()
-  // Muat seluruh bulan yang tampil di kalender + bulan sebelumnya (untuk periode 16 s/d 15)
-  // Agar data di luar periode tetap tampil sebagai histori
-  const firstDay = `${year}-${String(month).padStart(2,'0')}-01`
-  const lastDayNum = new Date(year, month + 1, 0).getDate()
-  const lastDay = `${year}-${String(month + 1).padStart(2,'0')}-${String(lastDayNum).padStart(2,'0')}`
+  // Periode: tgl 16 currentDate s/d 15 bulan berikutnya
+  const { start, end } = getPeriode()
+  const firstDay = start.toLocaleDateString('sv-SE')  // format YYYY-MM-DD aman
+  const lastDay = end.toLocaleDateString('sv-SE')
 
   dbg('INFO', 'loadAttendance', `Memuat ${firstDay} s/d ${lastDay}`)
 
@@ -887,41 +884,50 @@ async function saveAttendance(dateStr, status) {
 const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
 
 function renderCalendar() {
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth()
   const today = new Date()
+  const { start, end } = getPeriode()
 
-  document.getElementById('month-label').textContent = `${MONTHS_ID[month]} ${year}`
-
-  const firstDay = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  // Label periode di header
+  const MONTHS_ID_SHORT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  const label = `${start.getDate()} ${MONTHS_ID_SHORT[start.getMonth()]} — ${end.getDate()} ${MONTHS_ID_SHORT[end.getMonth()]} ${end.getFullYear()}`
+  document.getElementById('month-label').textContent = label
 
   const grid = document.getElementById('calendar-grid')
   grid.innerHTML = ''
 
-  // Empty cells before month start
-  for (let i = 0; i < firstDay; i++) {
+  // Isi sel kosong sebelum tgl 16 (sesuai hari dalam minggu)
+  const startDow = start.getDay() // 0=Min, 6=Sab
+  for (let i = 0; i < startDow; i++) {
     const cell = document.createElement('div')
     cell.className = 'cal-cell empty'
     grid.appendChild(cell)
   }
 
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-    const dayOfWeek = new Date(year, month, d).getDay()
+  // Loop dari tgl 16 s/d tgl 15 bulan depan
+  let cursor = new Date(start)
+  while (cursor <= end) {
+    const y = cursor.getFullYear()
+    const m = cursor.getMonth()
+    const d = cursor.getDate()
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const dayOfWeek = cursor.getDay()
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
-    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d
+    const isToday = today.getFullYear() === y && today.getMonth() === m && today.getDate() === d
     const status = attendanceData[dateStr]
 
-    const isInPeriode = inPeriode(dateStr)
+    // Label tanggal: tampilkan nama bulan singkat saat ganti bulan
+    const isFirstOfMonth = d === 1
+    const dateLabel = isFirstOfMonth ? `<span style="font-size:0.5rem;color:var(--accent);display:block;line-height:1">${MONTHS_ID_SHORT[m]}</span>${d}` : d
+
     const cell = document.createElement('div')
-    cell.className = `cal-cell${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${status ? ' ' + status : ''}${isInPeriode && !status ? ' in-periode' : ''}`
-    cell.innerHTML = `<span class="cal-date">${d}</span>${status ? '<div class="cal-dot"></div>' : ''}`
+    cell.className = `cal-cell${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${status ? ' ' + status : ''}`
+    cell.innerHTML = `<span class="cal-date" style="text-align:center">${dateLabel}</span>${status ? '<div class="cal-dot"></div>' : ''}`
 
     cell.addEventListener('click', (e) => { e.stopPropagation(); openMenu(e, dateStr) })
     cell.addEventListener('contextmenu', (e) => { e.preventDefault(); openMenu(e, dateStr) })
 
     grid.appendChild(cell)
+    cursor.setDate(cursor.getDate() + 1)
   }
 
   updateStats()
@@ -936,16 +942,8 @@ function getPeriode() {
   return { start, end }
 }
 
-function inPeriode(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00')
-  const { start, end } = getPeriode()
-  return d >= start && d <= end
-}
-
 function updateStats() {
-  const periodeVals = Object.entries(attendanceData)
-    .filter(([date]) => inPeriode(date))
-    .map(([, v]) => v)
+  const periodeVals = Object.values(attendanceData)
 
   const hadir = periodeVals.filter(v => v === 'hadir').length
   const lembur = periodeVals.filter(v => v === 'lembur').length
@@ -957,14 +955,13 @@ function updateStats() {
   document.getElementById('stat-libur').textContent = libur
   document.getElementById('stat-cuti').textContent = cuti
 
-  // Label periode
-  const { start, end } = getPeriode()
-  const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
-  const label = `${start.getDate()} ${MONTHS[start.getMonth()]} — ${end.getDate()} ${MONTHS[end.getMonth()]} ${end.getFullYear()}`
-  document.getElementById('stat-periode').textContent = label
+  // Label periode di stat sidebar
+  const { start: ps, end: pe } = getPeriode()
+  const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  document.getElementById('stat-periode').textContent = `${ps.getDate()} ${MN[ps.getMonth()]} — ${pe.getDate()} ${MN[pe.getMonth()]} ${pe.getFullYear()}`
 }
 
-async function changeMonth(dir) {
+async function changePeriode(dir) {
   currentDate.setMonth(currentDate.getMonth() + dir)
   attendanceData = {}
   renderCalendar()
