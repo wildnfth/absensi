@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Absensi — Laurent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #131316;
+    --surface2: #1a1a1f;
+    --border: #2a2a32;
+    --accent: #c9a84c;
+    --accent2: #e8c97a;
+    --text: #e8e4dc;
+    --text-dim: #7a7670;
+    --hadir: #4caf7d;
+    --lembur: #c9a84c;
+    --libur: #444;
+    --red: #e05a5a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* AUTH SCREEN */
+  #auth-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  .auth-card {
+    border: 1px solid var(--border);
+    padding: 3rem;
+    width: min(420px, 92vw);
+    background: var(--surface);
+    position: relative;
+  }
+
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 40px; height: 40px;
+    border-top: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+
+  .auth-card::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 40px; height: 40px;
+    border-bottom: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+  }
+
+  .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .brand-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus { border-color: var(--accent); }
+
+  .btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 0.5rem;
+  }
+
+  .btn:hover { background: var(--accent2); }
+  .btn:active { transform: scale(0.99); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+  }
+
+  .btn-ghost:hover { border-color: var(--text-dim); background: transparent; color: var(--text); }
+
+  .auth-error {
+    color: var(--red);
+    font-size: 0.75rem;
+    margin-top: 1rem;
+    display: none;
+  }
+
+  /* MAIN APP */
+  #app {
+    display: none;
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .header-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .user-info {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .btn-logout {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.4rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* LAYOUT */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  /* STATS PANEL */
+  .stats-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .month-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+  }
+
+  .stat-card.hadir::before { background: var(--hadir); }
+  .stat-card.lembur::before { background: var(--lembur); }
+
+  .stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .stat-unit {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+  }
+
+  /* LEGEND */
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .legend-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* INSTRUCTION */
+  .instruction {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .instruction strong { color: var(--accent); font-weight: 400; }
+
+  /* CALENDAR */
+  .calendar-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  .calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 0.5rem;
+  }
+
+  .cal-day-name {
+    text-align: center;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.5rem 0;
+  }
+
+  .cal-day-name.weekend { color: var(--accent); opacity: 0.6; }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-cell {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    font-size: 0.85rem;
+    border-radius: 2px;
+    user-select: none;
+  }
+
+  .cal-cell:hover:not(.empty):not(.other-month) {
+    border-color: var(--border);
+    background: var(--surface2);
+  }
+
+  .cal-cell.empty, .cal-cell.other-month {
+    cursor: default;
+    opacity: 0.2;
+  }
+
+  .cal-cell.today {
+    border-color: var(--accent) !important;
+  }
+
+  .cal-cell.weekend .cal-date { color: var(--text-dim); }
+
+  .cal-date {
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  .cal-cell.hadir {
+    background: rgba(76, 175, 125, 0.12);
+    border-color: rgba(76, 175, 125, 0.3);
+  }
+
+  .cal-cell.lembur {
+    background: rgba(201, 168, 76, 0.12);
+    border-color: rgba(201, 168, 76, 0.35);
+  }
+
+  .cal-cell.hadir .cal-date { color: var(--hadir); }
+  .cal-cell.lembur .cal-date { color: var(--lembur); }
+
+  .cal-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    margin-top: 3px;
+  }
+
+  .cal-cell.hadir .cal-dot { background: var(--hadir); }
+  .cal-cell.lembur .cal-dot { background: var(--lembur); }
+
+  /* CONTEXT MENU */
+  .ctx-menu {
+    position: fixed;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    z-index: 1000;
+    min-width: 160px;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  .ctx-menu.show { display: block; }
+
+  .ctx-item {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: background 0.1s;
+  }
+
+  .ctx-item:hover { background: var(--surface); }
+  .ctx-item .ctx-icon { font-size: 1rem; }
+  .ctx-item.danger { color: var(--red); }
+  .ctx-item.danger:hover { background: rgba(224,90,90,0.1); }
+  .ctx-divider { height: 1px; background: var(--border); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(4rem);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    z-index: 9999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* LOADING */
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .main-layout {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+
+    .stats-panel { order: 2; }
+    .calendar-container { order: 1; }
+
+    header { padding: 1rem; }
+    .user-info { display: none; }
+  }
+
+  /* ANIMATION */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .calendar-grid { animation: fadeIn 0.3s ease; }
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="brand">Absensi</div>
+    <div class="brand-sub">Sistem Rekap Kehadiran</div>
+
+    <div id="login-form">
+      <div class="form-group">
+        <label>Alamat Surel</label>
+        <input type="email" id="email" placeholder="nama@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Kata Sandi</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn" onclick="login()">Masuk</button>
+      <button class="btn btn-ghost" onclick="showRegister()">Daftar Akun Baru</button>
+    </div>
+
+    <div id="register-form" style="display:none">
+      <div class="form-group">
+        <label>Alamat Surel</label>
+        <input type="email" id="reg-email" placeholder="nama@email.com">
+      </div>
+      <div class="form-group">
+        <label>Kata Sandi</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 karakter">
+      </div>
+      <button class="btn" onclick="register()">Buat Akun</button>
+      <button class="btn btn-ghost" onclick="showLogin()">Sudah punya akun? Masuk</button>
+    </div>
+
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header>
+    <div class="header-brand">✦ Absensi</div>
+    <div class="header-right">
+      <span class="user-info" id="user-email-display"></span>
+      <button class="btn-logout" onclick="logout()">Keluar</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- CALENDAR -->
+    <div>
+      <div class="month-nav">
+        <button class="nav-btn" onclick="changeMonth(-1)">←</button>
+        <div class="month-label" id="month-label">—</div>
+        <button class="nav-btn" onclick="changeMonth(1)">→</button>
+      </div>
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <div class="cal-day-name weekend">Min</div>
+          <div class="cal-day-name">Sen</div>
+          <div class="cal-day-name">Sel</div>
+          <div class="cal-day-name">Rab</div>
+          <div class="cal-day-name">Kam</div>
+          <div class="cal-day-name">Jum</div>
+          <div class="cal-day-name weekend">Sab</div>
+        </div>
+        <div class="calendar-grid" id="calendar-grid">
+          <div class="loading">Memuat...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-panel">
+      <div class="stat-card hadir">
+        <div class="stat-label">Hari Masuk</div>
+        <div class="stat-value" id="stat-hadir">0</div>
+        <div class="stat-unit">hari bulan ini</div>
+      </div>
+      <div class="stat-card lembur">
+        <div class="stat-label">Lembur</div>
+        <div class="stat-value" id="stat-lembur">0</div>
+        <div class="stat-unit">kali bulan ini</div>
+      </div>
+      <div class="legend">
+        <div class="legend-title">Keterangan</div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--hadir)"></div>
+          Hadir Normal
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--lembur)"></div>
+          Hadir + Lembur
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--border)"></div>
+          Tidak ditandai
+        </div>
+      </div>
+      <div class="instruction">
+        <strong>Cara pakai:</strong><br>
+        Klik kanan tanggal untuk menandai kehadiran. Klik kiri untuk membuka menu pilihan.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" onclick="setStatus('hadir')">
+    <span class="ctx-icon">✓</span> Tandai Hadir
+  </div>
+  <div class="ctx-item" onclick="setStatus('lembur')">
+    <span class="ctx-icon">⏰</span> Hadir + Lembur
+  </div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item danger" onclick="setStatus(null)">
+    <span class="ctx-icon">✕</span> Hapus Tanda
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================
+// KONFIGURASI SUPABASE
+// Ganti dengan URL dan ANON KEY dari project Supabase Anda
+// ============================
+const SUPABASE_URL = 'https://rzynbnftppgpiofnqcuc.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_GCK8yUCSm0xfSlBVOX8rag_j0Er-PfZ'
+
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// STATE
+let currentUser = null
+let currentDate = new Date()
+let attendanceData = {} // { 'YYYY-MM-DD': 'hadir'|'lembur' }
+let selectedDate = null
+
+// ============================
+// AUTH
+// ============================
+async function login() {
+  const email = document.getElementById('email').value.trim()
+  const password = document.getElementById('password').value
+  if (!email || !password) return showAuthError('Isi semua kolom.')
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password })
+  if (error) return showAuthError(error.message)
+  onLogin(data.user)
+}
+
+async function register() {
+  const email = document.getElementById('reg-email').value.trim()
+  const password = document.getElementById('reg-password').value
+  if (!email || !password) return showAuthError('Isi semua kolom.')
+  if (password.length < 6) return showAuthError('Kata sandi minimal 6 karakter.')
+
+  const { data, error } = await db.auth.signUp({ email, password })
+  if (error) return showAuthError(error.message)
+  showAuthError('✓ Akun dibuat! Silakan masuk.')
+  showLogin()
+}
+
+async function logout() {
+  await db.auth.signOut()
+  currentUser = null
+  attendanceData = {}
+  document.getElementById('auth-screen').style.display = 'flex'
+  document.getElementById('app').style.display = 'none'
+}
+
+function showRegister() {
+  document.getElementById('login-form').style.display = 'none'
+  document.getElementById('register-form').style.display = 'block'
+  clearAuthError()
+}
+
+function showLogin() {
+  document.getElementById('login-form').style.display = 'block'
+  document.getElementById('register-form').style.display = 'none'
+  clearAuthError()
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error')
+  el.textContent = msg
+  el.style.display = 'block'
+}
+
+function clearAuthError() {
+  document.getElementById('auth-error').style.display = 'none'
+}
+
+function onLogin(user) {
+  currentUser = user
+  document.getElementById('auth-screen').style.display = 'none'
+  document.getElementById('app').style.display = 'block'
+  document.getElementById('user-email-display').textContent = user.email
+  loadAttendance()
+}
+
+// ============================
+// DATABASE
+// ============================
+async function loadAttendance() {
+  const year = currentDate.getFullYear()
+  const month = currentDate.getMonth() + 1
+  const monthStr = `${year}-${String(month).padStart(2,'0')}`
+
+  const { data, error } = await db
+    .from('attendance')
+    .select('date, status')
+    .eq('user_id', currentUser.id)
+    .like('date', `${monthStr}-%`)
+
+  if (error) { console.error(error); return }
+
+  attendanceData = {}
+  data.forEach(row => { attendanceData[row.date] = row.status })
+  renderCalendar()
+}
+
+async function saveAttendance(dateStr, status) {
+  if (status === null) {
+    // DELETE
+    const { error } = await db
+      .from('attendance')
+      .delete()
+      .eq('user_id', currentUser.id)
+      .eq('date', dateStr)
+    if (error) { showToast('Gagal menghapus'); return }
+    delete attendanceData[dateStr]
+  } else {
+    // UPSERT
+    const { error } = await db
+      .from('attendance')
+      .upsert({ user_id: currentUser.id, date: dateStr, status }, { onConflict: 'user_id,date' })
+    if (error) { showToast('Gagal menyimpan'); return }
+    attendanceData[dateStr] = status
+  }
+  renderCalendar()
+  updateStats()
+}
+
+// ============================
+// CALENDAR RENDER
+// ============================
+const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+
+function renderCalendar() {
+  const year = currentDate.getFullYear()
+  const month = currentDate.getMonth()
+  const today = new Date()
+
+  document.getElementById('month-label').textContent = `${MONTHS_ID[month]} ${year}`
+
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const grid = document.getElementById('calendar-grid')
+  grid.innerHTML = ''
+
+  // Empty cells before month start
+  for (let i = 0; i < firstDay; i++) {
+    const cell = document.createElement('div')
+    cell.className = 'cal-cell empty'
+    grid.appendChild(cell)
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const dayOfWeek = new Date(year, month, d).getDay()
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d
+    const status = attendanceData[dateStr]
+
+    const cell = document.createElement('div')
+    cell.className = `cal-cell${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${status ? ' ' + status : ''}`
+    cell.innerHTML = `<span class="cal-date">${d}</span>${status ? '<div class="cal-dot"></div>' : ''}`
+
+    cell.addEventListener('click', (e) => openMenu(e, dateStr))
+    cell.addEventListener('contextmenu', (e) => { e.preventDefault(); openMenu(e, dateStr) })
+
+    grid.appendChild(cell)
+  }
+
+  updateStats()
+}
+
+function updateStats() {
+  const hadir = Object.values(attendanceData).filter(v => v === 'hadir').length
+  const lembur = Object.values(attendanceData).filter(v => v === 'lembur').length
+  document.getElementById('stat-hadir').textContent = hadir + lembur
+  document.getElementById('stat-lembur').textContent = lembur
+}
+
+function changeMonth(dir) {
+  currentDate.setMonth(currentDate.getMonth() + dir)
+  loadAttendance()
+}
+
+// ============================
+// CONTEXT MENU
+// ============================
+function openMenu(e, dateStr) {
+  e.preventDefault()
+  selectedDate = dateStr
+  const menu = document.getElementById('ctx-menu')
+  menu.classList.add('show')
+
+  let x = e.clientX, y = e.clientY
+  if (x + 180 > window.innerWidth) x = window.innerWidth - 185
+  if (y + 120 > window.innerHeight) y = window.innerHeight - 125
+  menu.style.left = x + 'px'
+  menu.style.top = y + 'px'
+}
+
+function closeMenu() {
+  document.getElementById('ctx-menu').classList.remove('show')
+}
+
+async function setStatus(status) {
+  if (!selectedDate) return
+  closeMenu()
+  await saveAttendance(selectedDate, status)
+  const labels = { hadir: 'Ditandai: Hadir', lembur: 'Ditandai: Lembur', null: 'Tanda dihapus' }
+  showToast(status ? labels[status] : 'Tanda dihapus')
+}
+
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('ctx-menu').contains(e.target)) closeMenu()
+})
+
+// ============================
+// TOAST
+// ============================
+let toastTimer
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.classList.add('show')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500)
+}
+
+// ============================
+// INIT: CEK SESSION
+// ============================
+db.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    onLogin(session.user)
+  }
+})
+
+// Keyboard enter
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('register-form').style.display !== 'none') register()
+    else login()
+  }
+})
+</script>
+</body>
+</html>
