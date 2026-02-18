@@ -53,6 +53,8 @@
   --c-libur-bg: #D3E4FF;
   --c-cuti:   #7B5495;
   --c-cuti-bg: #EEDCFF;
+  --c-bonus:   #B06010;
+  --c-bonus-bg:#FFF0DC;
 
   /* Shape */
   --shape-xs:   4px;
@@ -405,21 +407,25 @@ header {
 .cal-cell.lembur { background: var(--c-lembur-bg); }
 .cal-cell.libur  { background: var(--c-libur-bg); }
 .cal-cell.cuti   { background: var(--c-cuti-bg); }
+.cal-cell.bonus  { background: var(--c-bonus-bg); border-color: rgba(176,96,16,0.35) !important; }
 
 .cal-cell.hadir  .cal-date { color: var(--c-hadir); font-weight: 500; }
 .cal-cell.lembur .cal-date { color: var(--c-lembur); font-weight: 500; }
 .cal-cell.libur  .cal-date { color: var(--c-libur); font-weight: 500; }
 .cal-cell.cuti   .cal-date { color: var(--c-cuti); font-weight: 500; }
+.cal-cell.bonus  .cal-date { color: var(--c-bonus); font-weight: 500; }
 
 .cal-cell.hadir  .cal-dot { background: var(--c-hadir); }
 .cal-cell.lembur .cal-dot { background: var(--c-lembur); }
 .cal-cell.libur  .cal-dot { background: var(--c-libur); }
 .cal-cell.cuti   .cal-dot { background: var(--c-cuti); }
+.cal-cell.bonus  .cal-dot { background: var(--c-bonus); }
 
 .cal-cell.hadir:hover  { background: #B2DBA0; }
 .cal-cell.lembur:hover { background: #F7C4DC; }
 .cal-cell.libur:hover  { background: #C0D4F5; }
 .cal-cell.cuti:hover   { background: #E0CCFF; }
+.cal-cell.bonus:hover  { background: #FFDCB0; }
 
 /* ── SIDEBAR ── */
 .sidebar { display: flex; flex-direction: column; gap: 1rem; }
@@ -585,6 +591,7 @@ header {
 .note-entry:last-child { margin-bottom: 0; }
 .note-entry.e-lembur { background: var(--c-lembur-bg); }
 .note-entry.e-cuti   { background: var(--c-cuti-bg); }
+.note-entry.e-bonus  { background: var(--c-bonus-bg); }
 
 .note-entry-icon { font-size: 0.875rem; flex-shrink: 0; margin-top: 1px; }
 .note-entry-content { flex: 1; min-width: 0; }
@@ -597,6 +604,7 @@ header {
 }
 .note-entry.e-lembur .note-entry-date { color: var(--c-lembur); }
 .note-entry.e-cuti   .note-entry-date { color: var(--c-cuti); }
+.note-entry.e-bonus  .note-entry-date { color: var(--c-bonus); }
 
 .note-entry-text {
   font-size: 0.8rem;
@@ -1090,6 +1098,10 @@ header {
           <div class="leg-chip" style="background:var(--c-cuti-bg);color:var(--c-cuti)">Cuti</div>
           Izin/cuti/sakit
         </div>
+        <div class="leg-item">
+          <div class="leg-chip" style="background:var(--c-bonus-bg);color:var(--c-bonus)">Bonus</div>
+          Libur bonus 🎁
+        </div>
       </div>
 
       <div class="notes-list-card" id="notes-list-card">
@@ -1152,6 +1164,22 @@ header {
   </div>
 </div>
 
+<!-- Bonus Dialog -->
+<div class="dialog-scrim" id="bonus-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">🎁</div>
+    <div class="dialog-title">Libur Bonus</div>
+    <div class="dialog-subtitle" id="bonus-dialog-date">—</div>
+    <div class="dialog-field">
+      <textarea id="bonus-note-input" placeholder="Contoh: Imlek, HUT perusahaan, acara khusus..."></textarea>
+    </div>
+    <div class="dialog-actions">
+      <button class="dialog-btn-text" onclick="closeBonusDialog()">Batal</button>
+      <button class="dialog-btn-filled" onclick="confirmBonus()">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <!-- Lembur Dialog -->
 <div class="dialog-scrim" id="lembur-dialog">
   <div class="dialog">
@@ -1198,6 +1226,10 @@ header {
   <div class="ctx-item" onclick="setStatus('cuti')">
     <div class="ctx-lead" style="background:var(--c-cuti-bg);color:var(--c-cuti)">✦</div>
     Izin / Cuti / Sakit
+  </div>
+  <div class="ctx-item" onclick="setStatus('bonus')">
+    <div class="ctx-lead" style="background:var(--c-bonus-bg);color:var(--c-bonus)">🎁</div>
+    Libur Bonus
   </div>
   <div class="ctx-div"></div>
   <div class="ctx-item danger" onclick="setStatus(null)">
@@ -1495,7 +1527,7 @@ function renderNotesPanel() {
   const entries = Object.entries(attendanceData)
     .filter(([date, entry]) => {
       const d = new Date(date + 'T00:00:00')
-      return d >= start && d <= end && (entry.status === 'lembur' || entry.status === 'cuti')
+      return d >= start && d <= end && (entry.status === 'lembur' || entry.status === 'cuti' || entry.status === 'bonus')
     })
     .sort(([a], [b]) => a.localeCompare(b))
 
@@ -1514,6 +1546,12 @@ function renderNotesPanel() {
       return `<div class="note-entry e-lembur">
         <span class="note-entry-icon">⏰</span>
         <div class="note-entry-content"><div class="note-entry-date">${tgl}</div>${badge}${note}</div>
+      </div>`
+    } else if (entry.status === 'bonus') {
+      const note = entry.note || '<em style="opacity:0.5">tidak ada keterangan</em>'
+      return `<div class="note-entry e-bonus">
+        <span class="note-entry-icon">🎁</span>
+        <div class="note-entry-content"><div class="note-entry-date">${tgl}</div><div class="note-entry-text">${note}</div></div>
       </div>`
     } else {
       const note = entry.note || '<em style="opacity:0.5">tidak ada keterangan</em>'
@@ -1553,6 +1591,11 @@ async function setStatus(status) {
 
   if (status === 'lembur') {
     openLemburDialog(selectedDate)
+    return
+  }
+
+  if (status === 'bonus') {
+    openBonusDialog(selectedDate)
     return
   }
 
@@ -1656,6 +1699,41 @@ function updatePeriodeLabel() {
 
 document.getElementById('periode-dialog').addEventListener('click', e => {
   if (e.target === document.getElementById('periode-dialog')) closePeriodeDialog()
+})
+
+// ── BONUS DIALOG ──
+let pendingBonusDate = null
+
+function openBonusDialog(dateStr) {
+  pendingBonusDate = dateStr
+  const MN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+  const [y, m, d] = dateStr.split('-')
+  document.getElementById('bonus-dialog-date').textContent = `${parseInt(d)} ${MN_FULL[parseInt(m)-1]} ${y}`
+  document.getElementById('bonus-note-input').value = attendanceData[dateStr]?.note || ''
+  document.getElementById('bonus-dialog').classList.add('show')
+  setTimeout(() => document.getElementById('bonus-note-input').focus(), 200)
+}
+
+function closeBonusDialog() {
+  document.getElementById('bonus-dialog').classList.remove('show')
+  pendingBonusDate = null
+}
+
+async function confirmBonus() {
+  if (!pendingBonusDate) return
+  const dateToSave = pendingBonusDate
+  const note = document.getElementById('bonus-note-input').value.trim()
+  closeBonusDialog()
+  await saveAttendance(dateToSave, 'bonus', note, null)
+  showToast('Libur Bonus dicatat 🎁')
+}
+
+document.getElementById('bonus-dialog').addEventListener('click', e => {
+  if (e.target === document.getElementById('bonus-dialog')) closeBonusDialog()
+})
+
+document.getElementById('bonus-note-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) confirmBonus()
 })
 
 // ── LEMBUR DIALOG ──
