@@ -551,63 +551,163 @@ header {
   line-height: 1.6;
 }
 
-/* Note Panel */
-.note-panel {
+/* Notes List Card */
+.notes-list-card {
   background: var(--md-surface-container-lowest);
   border: 1.5px solid var(--md-outline-variant);
   border-radius: var(--shape-xl);
   padding: 1rem 1.25rem;
-  transition: background 0.2s, border-color 0.2s;
+  max-height: 280px;
+  overflow-y: auto;
 }
+.notes-list-card::-webkit-scrollbar { width: 4px; }
+.notes-list-card::-webkit-scrollbar-track { background: transparent; }
+.notes-list-card::-webkit-scrollbar-thumb { background: var(--md-outline-variant); border-radius: 4px; }
 
-.note-panel.has-note {
-  background: var(--c-cuti-bg);
-  border-color: transparent;
-}
-
-.note-panel.has-lembur {
-  background: var(--c-lembur-bg);
-  border-color: transparent;
-}
-
-.note-panel-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+.notes-list-title {
   font-family: 'Google Sans', sans-serif;
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--md-on-surface-variant);
+  margin-bottom: 0.75rem;
 }
 
-.note-panel.has-note .note-panel-header  { color: var(--c-cuti); }
-.note-panel.has-lembur .note-panel-header { color: var(--c-lembur); }
+.note-entry {
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--shape-md);
+  margin-bottom: 0.35rem;
+  align-items: flex-start;
+}
+.note-entry:last-child { margin-bottom: 0; }
+.note-entry.e-lembur { background: var(--c-lembur-bg); }
+.note-entry.e-cuti   { background: var(--c-cuti-bg); }
 
-.note-panel-body {
-  font-size: 0.875rem;
-  color: var(--md-on-surface-variant);
-  line-height: 1.55;
+.note-entry-icon { font-size: 0.875rem; flex-shrink: 0; margin-top: 1px; }
+.note-entry-content { flex: 1; min-width: 0; }
+
+.note-entry-date {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+.note-entry.e-lembur .note-entry-date { color: var(--c-lembur); }
+.note-entry.e-cuti   .note-entry-date { color: var(--c-cuti); }
+
+.note-entry-text {
+  font-size: 0.8rem;
+  line-height: 1.4;
   word-break: break-word;
+  color: var(--md-on-surface);
+}
+.note-entry.e-cuti .note-entry-text { font-style: italic; }
+
+.note-lembur-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--c-lembur);
+  background: rgba(139,74,107,0.12);
+  border-radius: var(--shape-full);
+  padding: 0.05rem 0.45rem;
+  display: inline-block;
+  margin-bottom: 0.15rem;
 }
 
-.note-panel.has-note .note-panel-body  { color: var(--c-cuti); font-style: italic; }
-.note-panel.has-lembur .note-panel-body { color: var(--c-lembur); }
+.note-empty { font-style: italic; opacity: 0.55; font-size: 0.8125rem; color: var(--md-on-surface-variant); }
 
-.note-empty { font-style: italic; opacity: 0.6; font-size: 0.8125rem; }
-
-.note-lembur-count {
+/* Periode Settings */
+.periode-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.stepper-val {
   font-family: 'Google Sans Display', sans-serif;
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 400;
-  color: var(--c-lembur);
+  color: var(--md-primary);
   line-height: 1;
+  min-width: 60px;
+  text-align: center;
+}
+.stepper-lbl { font-size: 0.75rem; color: var(--md-on-surface-variant); text-align: center; margin-top: 0.2rem; }
+
+/* Periode Dual Stepper */
+.periode-dual-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0.75rem;
+}
+.pds-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--md-surface-container);
+  border-radius: var(--shape-lg);
+  padding: 0.9rem 0.5rem;
+}
+.pds-label {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+  margin-bottom: 0.1rem;
+}
+.pds-val {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--md-primary);
+  line-height: 1;
+  min-width: 52px;
+  text-align: center;
+}
+.pds-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--md-outline-variant);
+  background: var(--md-surface-container-lowest);
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--md-primary);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.pds-btn:hover { background: rgba(139,74,107,0.1); }
+.pds-arrow {
+  font-size: 1.2rem;
+  color: var(--md-outline);
+  flex-shrink: 0;
+}
+.pds-preview {
+  text-align: center;
+  font-size: 0.875rem;
+  font-family: 'Google Sans', sans-serif;
+  color: var(--md-on-surface);
+  font-weight: 500;
+  background: var(--md-surface-container);
+  border-radius: var(--shape-md);
+  padding: 0.5rem 0.75rem;
   margin-bottom: 0.25rem;
 }
-
-.note-lembur-unit { font-size: 0.75rem; color: var(--c-lembur); opacity: 0.8; }
+.pds-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--md-on-surface-variant);
+  opacity: 0.7;
+  margin-bottom: 0.25rem;
+}
 
 /* ── M3 MENU (Context Menu) ── */
 .ctx-menu {
@@ -992,18 +1092,15 @@ header {
         </div>
       </div>
 
-      <div class="note-panel" id="note-panel">
-        <div class="note-panel-header">
-          <span id="note-panel-icon">📋</span>
-          <span id="note-panel-date" style="font-family:'Google Sans',sans-serif;font-size:0.75rem;font-weight:500"></span>
-        </div>
-        <div class="note-panel-body" id="note-panel-body">
-          <span class="note-empty">Ketuk tanggal untuk melihat detail</span>
+      <div class="notes-list-card" id="notes-list-card">
+        <div class="notes-list-title">Catatan Periode</div>
+        <div id="notes-list-body">
+          <span class="note-empty">Belum ada catatan untuk periode ini</span>
         </div>
       </div>
 
-      <div class="info-card">
-        <p>Ketuk tanggal untuk memilih status. Periode dihitung dari tgl <strong>16 s/d 15</strong> bulan berikutnya.</p>
+      <div class="info-card" id="info-card-tip">
+        <p>Ketuk tanggal untuk memilih status. Periode: tgl <strong id="periode-start-label">16</strong> s/d <strong id="periode-end-label">15</strong> bulan berikutnya. <span id="ganti-periode-btn" style="color:var(--md-primary);cursor:pointer;font-weight:500;text-decoration:underline;white-space:nowrap" onclick="openPeriodeDialog()">Ubah</span></p>
       </div>
     </div>
   </div>
@@ -1021,6 +1118,36 @@ header {
     <div class="dialog-actions">
       <button class="dialog-btn-text" onclick="closeNoteDialog()">Batal</button>
       <button class="dialog-btn-filled" onclick="confirmCuti()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Periode Dialog -->
+<div class="dialog-scrim" id="periode-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">📅</div>
+    <div class="dialog-title">Periode Gaji</div>
+    <div class="dialog-subtitle">Pilih tanggal mulai dan akhir bebas</div>
+    <div class="periode-dual-stepper">
+      <div class="pds-col">
+        <div class="pds-label">Mulai</div>
+        <button class="pds-btn" onclick="adjustDay('start',-1)">−</button>
+        <div class="pds-val" id="ps-val">16</div>
+        <button class="pds-btn" onclick="adjustDay('start',1)">+</button>
+      </div>
+      <div class="pds-arrow">→</div>
+      <div class="pds-col">
+        <div class="pds-label">Akhir</div>
+        <button class="pds-btn" onclick="adjustDay('end',-1)">−</button>
+        <div class="pds-val" id="pe-val">15</div>
+        <button class="pds-btn" onclick="adjustDay('end',1)">+</button>
+      </div>
+    </div>
+    <div class="pds-preview" id="periode-preview-text">—</div>
+    <div class="pds-hint" id="periode-preview-hint"></div>
+    <div class="dialog-actions">
+      <button class="dialog-btn-text" onclick="closePeriodeDialog()">Batal</button>
+      <button class="dialog-btn-filled" onclick="confirmPeriode()">Simpan</button>
     </div>
   </div>
 </div>
@@ -1098,6 +1225,8 @@ let currentUser    = null
 let currentDate    = new Date()
 let attendanceData = {}
 let selectedDate   = null
+let periodeStart   = 16   // tanggal mulai
+let periodeEnd     = 15   // tanggal akhir (bulan berikutnya jika < periodeStart)
 
 // ── DEBUG ──
 const logs = []
@@ -1181,15 +1310,38 @@ function onLogin(user) {
   document.getElementById('auth-screen').style.display = 'none'
   document.getElementById('app').style.display = 'block'
   document.getElementById('user-email-display').textContent = user.email
-  renderCalendar()
-  loadAttendance()
+  // Restore periode dari localStorage (cepat, offline)
+  const lsPS = localStorage.getItem('absensi_ps')
+  const lsPE = localStorage.getItem('absensi_pe')
+  if (lsPS) periodeStart = parseInt(lsPS)
+  if (lsPE) periodeEnd   = parseInt(lsPE)
+  // Sinkron dari Supabase user metadata
+  db.auth.getUser().then(({ data }) => {
+    const meta = data?.user?.user_metadata
+    if (meta?.periode_start) { periodeStart = meta.periode_start; localStorage.setItem('absensi_ps', periodeStart) }
+    if (meta?.periode_end)   { periodeEnd   = meta.periode_end;   localStorage.setItem('absensi_pe', periodeEnd) }
+    updatePeriodeLabel()
+    renderCalendar()
+    loadAttendance()
+  }).catch(() => {
+    updatePeriodeLabel()
+    renderCalendar()
+    loadAttendance()
+  })
 }
 
 // ── PERIODE ──
 function getPeriode() {
-  const y = currentDate.getFullYear()
-  const m = currentDate.getMonth()
-  return { start: new Date(y, m, 16), end: new Date(y, m+1, 15) }
+  const y  = currentDate.getFullYear()
+  const m  = currentDate.getMonth()
+  const ps = periodeStart
+  const pe = periodeEnd
+  const start = new Date(y, m, ps)
+  // Jika hari akhir < hari mulai → akhir di bulan berikutnya
+  const endMonth = pe < ps ? m + 1 : m
+  const lastDay  = new Date(y, endMonth + 1, 0).getDate()  // hari terakhir bulan tujuan
+  const end = new Date(y, endMonth, Math.min(pe, lastDay))
+  return { start, end }
 }
 
 // ── DATABASE ──
@@ -1226,7 +1378,6 @@ async function saveAttendance(dateStr, status, note = '', lembur_count = null) {
   dbg('INFO','save','OK')
   renderCalendar()
   updateStats()
-  showNotePanel(dateStr)
 }
 
 // ── CALENDAR ──
@@ -1270,7 +1421,7 @@ function renderCalendar() {
     cell.innerHTML = `${badge}<span class="cal-date">${d}</span>${dot}${noteDot}`
     if (note) cell.title = note
 
-    cell.addEventListener('click', e => { e.stopPropagation(); openMenu(e, dateStr); showNotePanel(dateStr) })
+    cell.addEventListener('click', e => { e.stopPropagation(); openMenu(e, dateStr) })
     cell.addEventListener('contextmenu', e => { e.preventDefault(); openMenu(e, dateStr) })
 
     grid.appendChild(cell)
@@ -1294,6 +1445,7 @@ function updateStats() {
   const { start, end } = getPeriode()
   document.getElementById('stat-periode').textContent =
     `${start.getDate()} ${MN[start.getMonth()]} — ${end.getDate()} ${MN[end.getMonth()]} ${end.getFullYear()}`
+  renderNotesPanel()
 }
 
 async function changePeriode(dir) {
@@ -1335,48 +1487,45 @@ function openMenu(e, dateStr) {
 
 function closeMenu() { document.getElementById('ctx-menu').classList.remove('show') }
 
-function showNotePanel(dateStr) {
-  const panel  = document.getElementById('note-panel')
-  const icon   = document.getElementById('note-panel-icon')
-  const dateEl = document.getElementById('note-panel-date')
-  const body   = document.getElementById('note-panel-body')
+function renderNotesPanel() {
+  const body = document.getElementById('notes-list-body')
+  const MN   = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  const { start, end } = getPeriode()
 
-  panel.className = 'note-panel'
-  panel.style.display = 'block'
+  const entries = Object.entries(attendanceData)
+    .filter(([date, entry]) => {
+      const d = new Date(date + 'T00:00:00')
+      return d >= start && d <= end && (entry.status === 'lembur' || entry.status === 'cuti')
+    })
+    .sort(([a], [b]) => a.localeCompare(b))
 
-  const entry = attendanceData[dateStr]
-  if (!entry) {
-    icon.textContent = '📋'
-    dateEl.textContent = 'Detail'
-    body.innerHTML = '<span class="note-empty">Ketuk tanggal untuk melihat detail</span>'
+  if (entries.length === 0) {
+    body.innerHTML = '<span class="note-empty">Belum ada catatan untuk periode ini</span>'
     return
   }
 
-  const MN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
-  const [y, m, d] = dateStr.split('-')
-  const tgl = `${parseInt(d)} ${MN_FULL[parseInt(m)-1]} ${y}`
-
-  if (entry.status === 'cuti') {
-    panel.classList.add('has-note')
-    icon.textContent = '🤒'
-    dateEl.textContent = tgl
-    body.innerHTML = entry.note
-      ? `<em>${entry.note}</em>`
-      : '<span class="note-empty">Tidak ada keterangan</span>'
-  } else if (entry.status === 'lembur') {
-    panel.classList.add('has-lembur')
-    icon.textContent = '⏰'
-    dateEl.textContent = tgl
-    const cnt = entry.lembur_count ?? 1
-    body.innerHTML = `<div class="note-lembur-count">${cnt}×</div><div class="note-lembur-unit">kali lembur</div>${entry.note ? `<div style="margin-top:0.5rem;font-style:italic">${entry.note}</div>` : ''}`
-  } else {
-    const icons = { hadir:'✓', libur:'🌿' }
-    const labels = { hadir:'Hadir Normal', libur:'Libur Resmi' }
-    icon.textContent = icons[entry.status] || '📋'
-    dateEl.textContent = tgl
-    body.innerHTML = `<span style="opacity:0.7">${labels[entry.status] || ''}</span>`
-  }
+  body.innerHTML = entries.map(([date, entry]) => {
+    const [y, m, d] = date.split('-')
+    const tgl = `${parseInt(d)} ${MN[parseInt(m)-1]}`
+    if (entry.status === 'lembur') {
+      const cnt  = entry.lembur_count ?? 1
+      const badge = `<span class="note-lembur-badge">${cnt}× lembur</span>`
+      const note  = entry.note ? `<div class="note-entry-text">${entry.note}</div>` : ''
+      return `<div class="note-entry e-lembur">
+        <span class="note-entry-icon">⏰</span>
+        <div class="note-entry-content"><div class="note-entry-date">${tgl}</div>${badge}${note}</div>
+      </div>`
+    } else {
+      const note = entry.note || '<em style="opacity:0.5">tidak ada keterangan</em>'
+      return `<div class="note-entry e-cuti">
+        <span class="note-entry-icon">🤒</span>
+        <div class="note-entry-content"><div class="note-entry-date">${tgl}</div><div class="note-entry-text">${note}</div></div>
+      </div>`
+    }
+  }).join('')
 }
+
+function showNotePanel() { renderNotesPanel() }
 
 // Reposition menu on scroll so it stays anchored to the cell
 document.addEventListener('scroll', () => {
@@ -1439,6 +1588,75 @@ async function confirmCuti() {
   await saveAttendance(dateToSave, 'cuti', note)
   showToast('Ditandai: Izin/Cuti/Sakit')
 }
+
+// ── PERIODE SETTINGS ──
+let tempPS = 16
+let tempPE = 15
+
+function openPeriodeDialog() {
+  tempPS = periodeStart
+  tempPE = periodeEnd
+  document.getElementById('ps-val').textContent = tempPS
+  document.getElementById('pe-val').textContent = tempPE
+  updatePeriodePreview()
+  document.getElementById('periode-dialog').classList.add('show')
+}
+
+function closePeriodeDialog() {
+  document.getElementById('periode-dialog').classList.remove('show')
+}
+
+function adjustDay(which, delta) {
+  if (which === 'start') {
+    tempPS = Math.max(1, Math.min(31, tempPS + delta))
+    document.getElementById('ps-val').textContent = tempPS
+  } else {
+    tempPE = Math.max(1, Math.min(31, tempPE + delta))
+    document.getElementById('pe-val').textContent = tempPE
+  }
+  updatePeriodePreview()
+}
+
+function updatePeriodePreview() {
+  const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  const m  = currentDate.getMonth()
+  const y  = currentDate.getFullYear()
+  const crossMonth = tempPE < tempPS
+  const endM = crossMonth ? (m + 1) % 12 : m
+  const endY = (crossMonth && m === 11) ? y + 1 : y
+  document.getElementById('periode-preview-text').textContent =
+    `${tempPS} ${MN[m]} — ${tempPE} ${MN[endM]} ${endY}`
+  document.getElementById('periode-preview-hint').textContent =
+    crossMonth ? 'Akhir di bulan berikutnya' : 'Dalam bulan yang sama'
+}
+
+async function confirmPeriode() {
+  periodeStart = tempPS
+  periodeEnd   = tempPE
+  closePeriodeDialog()
+  localStorage.setItem('absensi_ps', periodeStart)
+  localStorage.setItem('absensi_pe', periodeEnd)
+  try {
+    await db.auth.updateUser({ data: { periode_start: periodeStart, periode_end: periodeEnd } })
+    dbg('INFO','periode',`Tersimpan: ${periodeStart}→${periodeEnd}`)
+  } catch(e) { dbg('WARN','periode','Gagal simpan ke server',{msg:e.message}) }
+  updatePeriodeLabel()
+  attendanceData = {}
+  renderCalendar()
+  await loadAttendance()
+  showToast(`Periode: tgl ${periodeStart} s/d tgl ${periodeEnd}`)
+}
+
+function updatePeriodeLabel() {
+  const e1 = document.getElementById('periode-start-label')
+  const e2 = document.getElementById('periode-end-label')
+  if (e1) e1.textContent = periodeStart
+  if (e2) e2.textContent = periodeEnd
+}
+
+document.getElementById('periode-dialog').addEventListener('click', e => {
+  if (e.target === document.getElementById('periode-dialog')) closePeriodeDialog()
+})
 
 // ── LEMBUR DIALOG ──
 let pendingLemburDate = null
