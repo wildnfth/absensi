@@ -639,8 +639,8 @@
 // KONFIGURASI SUPABASE
 // Ganti dengan URL dan ANON KEY dari project Supabase Anda
 // ============================
-const SUPABASE_URL = 'https://rzynbnftppgpiofnqcuc.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6eW5ibmZ0cHBncGlvZm5xY3VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzOTg3OTYsImV4cCI6MjA4Njk3NDc5Nn0.l0xS2NeZ8jf7M44kwkauh34iG5uWaBbGBU6braSiFdo'
+const SUPABASE_URL = 'GANTI_DENGAN_SUPABASE_URL'
+const SUPABASE_ANON_KEY = 'GANTI_DENGAN_SUPABASE_ANON_KEY'
 
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -711,6 +711,9 @@ function onLogin(user) {
   document.getElementById('auth-screen').style.display = 'none'
   document.getElementById('app').style.display = 'block'
   document.getElementById('user-email-display').textContent = user.email
+  // Render kalender langsung tanpa tunggu Supabase
+  renderCalendar()
+  // Load data absensi di belakang layar
   loadAttendance()
 }
 
@@ -722,17 +725,22 @@ async function loadAttendance() {
   const month = currentDate.getMonth() + 1
   const monthStr = `${year}-${String(month).padStart(2,'0')}`
 
-  const { data, error } = await db
-    .from('attendance')
-    .select('date, status')
-    .eq('user_id', currentUser.id)
-    .like('date', `${monthStr}-%`)
+  try {
+    const { data, error } = await db
+      .from('attendance')
+      .select('date, status')
+      .eq('user_id', currentUser.id)
+      .like('date', `${monthStr}-%`)
 
-  if (error) { console.error(error); return }
+    if (error) { console.error('Supabase error:', error); return }
 
-  attendanceData = {}
-  data.forEach(row => { attendanceData[row.date] = row.status })
-  renderCalendar()
+    attendanceData = {}
+    data.forEach(row => { attendanceData[row.date] = row.status })
+    // Update kalender dengan data absensi setelah dapat dari server
+    renderCalendar()
+  } catch(e) {
+    console.error('Koneksi gagal, kalender tetap tampil tanpa data:', e)
+  }
 }
 
 async function saveAttendance(dateStr, status) {
