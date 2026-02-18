@@ -3,736 +3,883 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Absensi — Laurent</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Absensi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root {
-    --bg: #0d0d0f;
-    --surface: #131316;
-    --surface2: #1a1a1f;
-    --border: #2a2a32;
-    --accent: #c9a84c;
-    --accent2: #e8c97a;
-    --text: #e8e4dc;
-    --text-dim: #7a7670;
-    --hadir: #4caf7d;
-    --lembur: #c9a84c;
-    --libur: #5b8dd9;
-    --cuti: #b06cc4;
-    --periode: rgba(201,168,76,0.06);
-    --red: #e05a5a;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-image:
-      radial-gradient(circle at 20% 20%, rgba(232,160,192,0.12) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(196,120,154,0.08) 0%, transparent 50%),
-      radial-gradient(circle at 60% 10%, rgba(168,136,200,0.07) 0%, transparent 40%);
-  }
-
-  /* DOT PATTERN */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle, rgba(196,120,154,0.15) 1px, transparent 1px);
-    background-size: 28px 28px;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.5;
-  }
-
-  /* AUTH SCREEN */
-  #auth-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
-  }
-
-  .auth-card {
-    border: 1px solid var(--border);
-    padding: 3rem;
-    width: min(420px, 92vw);
-    background: var(--surface);
-    position: relative;
-    border-radius: 24px;
-    box-shadow: var(--shadow);
-  }
-
-  .auth-card::before {
-    content: '✿';
-    position: absolute;
-    top: -14px; left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg);
-    color: var(--accent);
-    padding: 0 12px;
-    font-size: 1.2rem;
-    line-height: 1;
-  }
-
-  .brand {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.4rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: var(--accent);
-    margin-bottom: 0.3rem;
-  }
-
-  .brand-sub {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 2.5rem;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .form-group { margin-bottom: 1.2rem; }
-
-  .form-group label {
-    display: block;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-
-  .form-group input {
-    width: 100%;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    padding: 0.75rem 1rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    border-radius: 12px;
-  }
-
-  .form-group input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(196,120,154,0.12);
-  }
-
-  .btn {
-    width: 100%;
-    padding: 0.85rem;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: white;
-    border: none;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
-    margin-top: 0.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(196,120,154,0.3);
-  }
-
-  .btn:hover { opacity: 0.9; box-shadow: 0 6px 16px rgba(196,120,154,0.4); }
-  .btn:active { transform: scale(0.99); }
-
-  .btn-ghost {
-    background: transparent;
-    border: 1.5px solid var(--border);
-    color: var(--text-dim);
-    margin-top: 0.75rem;
-    box-shadow: none;
-  }
-
-  .btn-ghost:hover { border-color: var(--accent); background: transparent; color: var(--accent); }
-
-  .auth-error {
-    color: #d4607a;
-    font-size: 0.78rem;
-    margin-top: 1rem;
-    display: none;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  /* MAIN APP */
-  #app {
-    display: none;
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
-  }
-
-  /* HEADER */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: rgba(13,13,15,0.92);
-    backdrop-filter: blur(12px);
-    z-index: 100;
-  }
-
-  .header-brand {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.4rem;
-    font-weight: 300;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .user-info {
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-  }
-
-  .btn-logout {
-    background: transparent;
-    border: 1.5px solid var(--border);
-    color: var(--text-dim);
-    padding: 0.4rem 1rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 20px;
-  }
-
-  .btn-logout:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* LAYOUT */
-  .main-layout {
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 0;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    gap: 2rem;
-  }
-
-  /* STATS PANEL */
-  .stats-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .month-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-  }
-
-  .month-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.6rem;
-    font-weight: 300;
-    letter-spacing: 0.05em;
-  }
-
-  .nav-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text-dim);
-    width: 36px; height: 36px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--surface2); }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.25rem 1.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px;
-    height: 100%;
-  }
-
-  .stat-card.hadir::before { background: var(--hadir); }
-  .stat-card.lembur::before { background: var(--lembur); }
-
-  .stat-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 0.5rem;
-  }
-
-  .stat-value {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 3rem;
-    font-weight: 300;
-    line-height: 1;
-    color: var(--text);
-  }
-
-  .stat-unit {
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    margin-top: 0.25rem;
-  }
-
-  /* LEGEND */
-  .legend {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    padding: 1.1rem 1.25rem;
-    border-radius: 16px;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .legend-title {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.6rem;
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    cursor: pointer;
-  }
-
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
-
-  /* INSTRUCTION */
-  .instruction {
-    background: linear-gradient(135deg, rgba(232,160,192,0.08), rgba(168,136,200,0.08));
-    border: 1.5px solid var(--border);
-    padding: 1rem 1.25rem;
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    line-height: 1.7;
-    border-radius: 16px;
-  }
-
-  .instruction strong { color: var(--accent); font-weight: 600; }
-
-  /* CALENDAR */
-  .calendar-container {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    padding: 1.5rem;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-  }
-
-  .calendar-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    margin-bottom: 0.5rem;
-  }
-
-  .cal-day-name {
-    text-align: center;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    padding: 0.5rem 0;
-  }
-
-  .cal-day-name.weekend { color: var(--accent); opacity: 0.6; }
-
-  .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-  }
-
-  .cal-cell {
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid transparent;
-    cursor: pointer;
-    transition: all 0.18s;
-    position: relative;
-    font-size: 0.85rem;
-    border-radius: 50%;
-    user-select: none;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .cal-cell:hover:not(.empty) {
-    border-color: var(--border);
-    background: var(--surface2);
-  }
-
-  .cal-cell.empty {
-    cursor: default;
-    opacity: 0.15;
-  }
-
-  .cal-cell.today {
-    border-color: var(--accent) !important;
-    background: rgba(196,120,154,0.08);
-  }
-
-  .cal-cell.weekend .cal-date { color: var(--accent2); }
-
-  .cal-date {
-    font-size: 0.82rem;
-    line-height: 1;
-    font-weight: 400;
-  }
-
-  .cal-cell.hadir {
-    background: rgba(125,184,154,0.18);
-    border-color: rgba(125,184,154,0.5);
-  }
-
-  .cal-cell.lembur {
-    background: rgba(196,120,154,0.15);
-    border-color: rgba(196,120,154,0.45);
-  }
-
-  .cal-cell.libur {
-    background: rgba(143,168,212,0.18);
-    border-color: rgba(143,168,212,0.5);
-  }
-
-  .cal-cell.cuti {
-    background: rgba(168,136,200,0.18);
-    border-color: rgba(168,136,200,0.5);
-  }
-
-  .cal-cell.hadir .cal-date { color: var(--hadir); }
-  .cal-cell.lembur .cal-date { color: var(--lembur); }
-  .cal-cell.libur .cal-date { color: var(--libur); }
-  .cal-cell.cuti .cal-date { color: var(--cuti); }
-
-  .cal-cell.hadir .cal-dot { background: var(--hadir); }
-  .cal-cell.lembur .cal-dot { background: var(--lembur); }
-  .cal-cell.libur .cal-dot { background: var(--libur); }
-  .cal-cell.cuti .cal-dot { background: var(--cuti); }
-
-  .cal-cell.in-periode {
-    background: var(--periode);
-  }
-
-  .periode-label {
-    font-size: 0.55rem;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    opacity: 0.7;
-    text-transform: uppercase;
-    text-align: center;
-    padding: 0.3rem 0 0;
-    grid-column: 1 / -1;
-  }
-
-  .cal-dot {
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    margin-top: 3px;
-  }
-
-  .cal-cell.hadir .cal-dot { background: var(--hadir); }
-  .cal-cell.lembur .cal-dot { background: var(--lembur); }
-
-  /* CONTEXT MENU */
-  .ctx-menu {
-    position: fixed;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    z-index: 1000;
-    min-width: 180px;
-    display: none;
-    box-shadow: 0 8px 32px rgba(196,120,154,0.18);
-    border-radius: 16px;
-    overflow: hidden;
-    padding: 6px;
-  }
-
-  .ctx-menu.show { display: block; animation: popIn 0.15s ease; }
-
-  @keyframes popIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .ctx-item {
-    padding: 0.65rem 1rem;
-    font-size: 0.82rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    transition: background 0.12s;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--text);
-  }
-
-  .ctx-item:hover { background: var(--surface2); }
-  .ctx-item .ctx-icon { font-size: 0.9rem; }
-  .ctx-item.danger { color: #d4607a; }
-  .ctx-item.danger:hover { background: rgba(212,96,122,0.08); }
-  .ctx-divider { height: 1px; background: var(--border); margin: 4px 0; }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(4rem);
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    padding: 0.7rem 1.4rem;
-    font-size: 0.8rem;
-    z-index: 9999;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    white-space: nowrap;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* LOADING */
-  .loading {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-dim);
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-  }
-
-  /* RESPONSIVE */
-  @media (max-width: 768px) {
-    .main-layout {
-      grid-template-columns: 1fr;
-      padding: 1rem;
-    }
-
-    .stats-panel { order: 2; }
-    .calendar-container { order: 1; }
-
-    header { padding: 1rem; }
-    .user-info { display: none; }
-  }
-
-  /* ANIMATION */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .calendar-grid { animation: fadeIn 0.25s ease; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pink:    #e8a0bf;
+  --pink-d:  #d4789f;
+  --purple:  #c4a8e0;
+  --purple-d:#a87fc8;
+  --bg:      #fefcff;
+  --surface: #ffffff;
+  --border:  #f0e6f6;
+  --text:    #3a2a4a;
+  --muted:   #b89ccc;
+  --hadir:   #a8d4b8;
+  --lembur:  #e8a0bf;
+  --libur:   #a8c4e8;
+  --cuti:    #c4a8e0;
+  --red:     #e06080;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(232,160,191,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(196,168,224,0.15) 0%, transparent 60%);
+}
+
+/* AUTH */
+#auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-wrap { width: 100%; max-width: 400px; }
+
+.auth-logo { text-align: center; margin-bottom: 2.5rem; }
+
+.auth-logo h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 400;
+  background: linear-gradient(135deg, var(--pink-d), var(--purple-d));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-logo p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 40px rgba(196,168,224,0.12);
+}
+
+.form-group { margin-bottom: 1.1rem; }
+
+.form-group label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.45rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 4px rgba(232,160,191,0.1);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, var(--pink-d), var(--purple-d));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 16px rgba(212,120,159,0.3);
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-primary:hover { opacity: 0.88; }
+.btn-primary:active { transform: scale(0.99); }
+
+.btn-ghost {
+  width: 100%;
+  padding: 0.75rem;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.83rem;
+  color: var(--muted);
+  cursor: pointer;
+  margin-top: 0.6rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-ghost:hover { border-color: var(--pink); color: var(--pink-d); }
+
+.auth-msg {
+  font-size: 0.78rem;
+  margin-top: 0.9rem;
+  display: none;
+  text-align: center;
+}
+
+/* APP */
+#app { display: none; }
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(254,252,255,0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  background: linear-gradient(135deg, var(--pink-d), var(--purple-d));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-right { display: flex; align-items: center; gap: 1rem; }
+
+.user-chip {
+  font-size: 0.7rem;
+  color: var(--muted);
+  padding: 0.3rem 0.8rem;
+  background: var(--border);
+  border-radius: 20px;
+}
+
+.btn-out {
+  font-size: 0.75rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--muted);
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-out:hover { border-color: var(--red); color: var(--red); }
+
+/* LAYOUT */
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 270px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* CALENDAR */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.period-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.nav-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(196,168,224,0.1);
+}
+
+.nav-btn:hover { border-color: var(--pink); color: var(--pink-d); }
+
+.cal-box {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 24px rgba(196,168,224,0.08);
+}
+
+.day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.5rem;
+}
+
+.day-name {
+  text-align: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.4rem 0;
+}
+
+.day-name.we { color: var(--pink-d); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.cal-cell {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.15s;
+  user-select: none;
+  position: relative;
+}
+
+.cal-cell:hover:not(.empty) { background: var(--border); border-color: var(--pink); }
+.cal-cell.empty { cursor: default; opacity: 0; pointer-events: none; }
+.cal-cell.today { border-color: var(--pink-d) !important; background: rgba(232,160,191,0.08); }
+.cal-cell.weekend .cal-date { color: var(--pink); }
+
+.cal-date { font-size: 0.8rem; font-weight: 400; line-height: 1; text-align: center; }
+
+.month-tag {
+  font-size: 0.46rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--pink-d);
+  line-height: 1;
+  margin-bottom: 1px;
+}
+
+.cal-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 2px; }
+
+.cal-cell.hadir  { background: rgba(168,212,184,0.25); border-color: rgba(168,212,184,0.6); }
+.cal-cell.lembur { background: rgba(232,160,191,0.22); border-color: rgba(232,160,191,0.6); }
+.cal-cell.libur  { background: rgba(168,196,232,0.22); border-color: rgba(168,196,232,0.6); }
+.cal-cell.cuti   { background: rgba(196,168,224,0.22); border-color: rgba(196,168,224,0.6); }
+
+.cal-cell.hadir  .cal-date { color: #5a9e78; }
+.cal-cell.lembur .cal-date { color: var(--pink-d); }
+.cal-cell.libur  .cal-date { color: #5a82b4; }
+.cal-cell.cuti   .cal-date { color: var(--purple-d); }
+
+.cal-cell.hadir  .cal-dot { background: #5a9e78; }
+.cal-cell.lembur .cal-dot { background: var(--pink-d); }
+.cal-cell.libur  .cal-dot { background: #5a82b4; }
+.cal-cell.cuti   .cal-dot { background: var(--purple-d); }
+
+/* SIDEBAR */
+.sidebar { display: flex; flex-direction: column; gap: 1rem; }
+
+.period-chip {
+  background: linear-gradient(135deg, rgba(232,160,191,0.1), rgba(196,168,224,0.1));
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+}
+
+.chip-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.chip-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: var(--pink-d);
+}
+
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+
+.stat-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem 1rem 0.85rem;
+  box-shadow: 0 2px 12px rgba(196,168,224,0.07);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover { transform: translateY(-2px); }
+.stat-lbl { font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.3rem; }
+.stat-val { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 400; line-height: 1; }
+.stat-unit { font-size: 0.6rem; color: var(--muted); margin-top: 0.15rem; }
+
+.c-hadir  .stat-val { color: #5a9e78; }
+.c-lembur .stat-val { color: var(--pink-d); }
+.c-libur  .stat-val { color: #5a82b4; }
+.c-cuti   .stat-val { color: var(--purple-d); }
+
+.legend-box {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+}
+
+.legend-box .leg-title { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 0.75rem; }
+
+.leg-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.78rem; color: var(--text); margin-bottom: 0.45rem; }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+.tip-box {
+  background: linear-gradient(135deg, rgba(232,160,191,0.06), rgba(196,168,224,0.06));
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.74rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.tip-box strong { color: var(--pink-d); font-weight: 600; }
+
+/* CONTEXT MENU */
+.ctx-menu {
+  position: fixed;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  z-index: 1000;
+  min-width: 190px;
+  display: none;
+  box-shadow: 0 12px 40px rgba(196,168,224,0.2);
+  padding: 6px;
+}
+
+.ctx-menu.show { display: block; animation: popIn 0.14s ease; }
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.94) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.ctx-item {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.83rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background 0.12s;
+}
+
+.ctx-item:hover { background: var(--border); }
+.ctx-icon { font-size: 0.85rem; width: 18px; text-align: center; }
+.ctx-div { height: 1px; background: var(--border); margin: 4px 2px; }
+.ctx-item.danger { color: var(--red); }
+.ctx-item.danger:hover { background: rgba(224,96,128,0.08); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 2rem; left: 50%;
+  transform: translateX(-50%) translateY(5rem);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  box-shadow: 0 8px 32px rgba(196,168,224,0.18);
+  z-index: 9999;
+  white-space: nowrap;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* DEBUG */
+#debug-toggle {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  cursor: pointer; font-size: 0.95rem;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 12px rgba(196,168,224,0.15);
+  z-index: 9998;
+  transition: all 0.2s;
+}
+
+#debug-toggle:hover { border-color: var(--pink); color: var(--pink-d); }
+
+#debug-panel {
+  display: none;
+  position: fixed; bottom: 4.5rem; right: 1rem;
+  width: min(380px,95vw); max-height: 280px; overflow-y: auto;
+  background: #1e1428;
+  border: 1.5px solid #3a2a4a;
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  font-family: monospace; font-size: 0.68rem;
+  z-index: 9997;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+
+@media (max-width: 720px) {
+  .layout { grid-template-columns: 1fr; padding: 1rem; gap: 1.25rem; }
+  .stat-grid { grid-template-columns: repeat(4,1fr); }
+  header { padding: 0.8rem 1rem; }
+  .user-chip { display: none; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cal-grid { animation: fadeUp 0.22s ease; }
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="auth-screen">
-  <div class="auth-card">
-    <div class="brand">Absensi</div>
-    <div class="brand-sub">Sistem Rekap Kehadiran</div>
-
-    <div id="login-form">
-      <div class="form-group">
-        <label>Alamat Surel</label>
-        <input type="email" id="email" placeholder="nama@email.com" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label>Kata Sandi</label>
-        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <button class="btn" onclick="login()">Masuk</button>
-      <button class="btn btn-ghost" onclick="showRegister()">Daftar Akun Baru</button>
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <h1>Absensi</h1>
+      <p>Rekap kehadiran harian</p>
     </div>
-
-    <div id="register-form" style="display:none">
-      <div class="form-group">
-        <label>Alamat Surel</label>
-        <input type="email" id="reg-email" placeholder="nama@email.com">
+    <div class="auth-card">
+      <div id="login-form">
+        <div class="form-group">
+          <label>Surel</label>
+          <input type="email" id="email" placeholder="nama@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Kata sandi</label>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-primary" onclick="login()">Masuk</button>
+        <button class="btn-ghost" onclick="showRegister()">Belum punya akun? Daftar</button>
       </div>
-      <div class="form-group">
-        <label>Kata Sandi</label>
-        <input type="password" id="reg-password" placeholder="Min. 6 karakter">
+      <div id="register-form" style="display:none">
+        <div class="form-group">
+          <label>Surel</label>
+          <input type="email" id="reg-email" placeholder="nama@email.com">
+        </div>
+        <div class="form-group">
+          <label>Kata sandi</label>
+          <input type="password" id="reg-password" placeholder="Min. 6 karakter">
+        </div>
+        <button class="btn-primary" onclick="register()">Buat akun</button>
+        <button class="btn-ghost" onclick="showLogin()">Sudah punya akun? Masuk</button>
       </div>
-      <button class="btn" onclick="register()">Buat Akun</button>
-      <button class="btn btn-ghost" onclick="showLogin()">Sudah punya akun? Masuk</button>
+      <div class="auth-msg" id="auth-msg"></div>
     </div>
-
-    <div class="auth-error" id="auth-error"></div>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app">
   <header>
-    <div class="header-brand">✿ Absensi</div>
+    <div class="logo">✿ Absensi</div>
     <div class="header-right">
-      <span class="user-info" id="user-email-display"></span>
-      <button class="btn-logout" onclick="logout()">Keluar</button>
+      <span class="user-chip" id="user-email-display"></span>
+      <button class="btn-out" onclick="logout()">Keluar</button>
     </div>
   </header>
 
-  <div class="main-layout">
-    <!-- CALENDAR -->
+  <div class="layout">
     <div>
-      <div class="month-nav">
+      <div class="cal-header">
         <button class="nav-btn" onclick="changePeriode(-1)">←</button>
-        <div class="month-label" id="month-label">—</div>
+        <div class="period-label" id="period-label">—</div>
         <button class="nav-btn" onclick="changePeriode(1)">→</button>
       </div>
-      <div class="calendar-container">
-        <div class="calendar-header">
-          <div class="cal-day-name weekend">Min</div>
-          <div class="cal-day-name">Sen</div>
-          <div class="cal-day-name">Sel</div>
-          <div class="cal-day-name">Rab</div>
-          <div class="cal-day-name">Kam</div>
-          <div class="cal-day-name">Jum</div>
-          <div class="cal-day-name weekend">Sab</div>
+      <div class="cal-box">
+        <div class="day-names">
+          <div class="day-name we">Min</div>
+          <div class="day-name">Sen</div>
+          <div class="day-name">Sel</div>
+          <div class="day-name">Rab</div>
+          <div class="day-name">Kam</div>
+          <div class="day-name">Jum</div>
+          <div class="day-name we">Sab</div>
         </div>
-        <div class="calendar-grid" id="calendar-grid">
-          <div class="loading">Memuat...</div>
+        <div class="cal-grid" id="cal-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem">Memuat...</div>
         </div>
       </div>
     </div>
 
-    <!-- STATS -->
-    <div class="stats-panel">
-      <div class="stat-card" style="border-left:3px solid var(--accent);background:var(--surface)">
-        <div class="stat-label">Periode Gaji</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--accent)" id="stat-periode">—</div>
+    <div class="sidebar">
+      <div class="period-chip">
+        <div class="chip-label">Periode Gaji</div>
+        <div class="chip-val" id="stat-periode">—</div>
       </div>
-      <div class="stat-card hadir">
-        <div class="stat-label">Hari Masuk</div>
-        <div class="stat-value" id="stat-hadir">0</div>
-        <div class="stat-unit">hari periode ini</div>
+
+      <div class="stat-grid">
+        <div class="stat-card c-hadir">
+          <div class="stat-lbl">Masuk</div>
+          <div class="stat-val" id="stat-hadir">0</div>
+          <div class="stat-unit">hari</div>
+        </div>
+        <div class="stat-card c-lembur">
+          <div class="stat-lbl">Lembur</div>
+          <div class="stat-val" id="stat-lembur">0</div>
+          <div class="stat-unit">kali</div>
+        </div>
+        <div class="stat-card c-libur">
+          <div class="stat-lbl">Libur</div>
+          <div class="stat-val" id="stat-libur">0</div>
+          <div class="stat-unit">hari</div>
+        </div>
+        <div class="stat-card c-cuti">
+          <div class="stat-lbl">Cuti</div>
+          <div class="stat-val" id="stat-cuti">0</div>
+          <div class="stat-unit">hari</div>
+        </div>
       </div>
-      <div class="stat-card lembur">
-        <div class="stat-label">Lembur</div>
-        <div class="stat-value" id="stat-lembur">0</div>
-        <div class="stat-unit">kali periode ini</div>
+
+      <div class="legend-box">
+        <div class="leg-title">Keterangan</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#5a9e78"></div> Hadir Normal</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--pink-d)"></div> Hadir + Lembur</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#5a82b4"></div> Libur Resmi</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--purple-d)"></div> Izin / Cuti / Sakit</div>
       </div>
-      <div class="stat-card" style="border-left:3px solid var(--libur);background:var(--surface)">
-        <div class="stat-label">Libur Resmi</div>
-        <div class="stat-value" id="stat-libur" style="color:var(--libur)">0</div>
-        <div class="stat-unit">hari periode ini</div>
-      </div>
-      <div class="stat-card" style="border-left:3px solid var(--cuti);background:var(--surface)">
-        <div class="stat-label">Izin / Cuti / Sakit</div>
-        <div class="stat-value" id="stat-cuti" style="color:var(--cuti)">0</div>
-        <div class="stat-unit">hari periode ini</div>
-      </div>
-      <div class="legend">
-        <div class="legend-title">Keterangan</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--hadir)"></div>Hadir Normal</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--lembur)"></div>Hadir + Lembur</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--libur)"></div>Libur Resmi</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--cuti)"></div>Izin / Cuti / Sakit</div>
-      </div>
-      <div class="instruction">
-        <strong>Cara pakai:</strong><br>
-        Klik tanggal → pilih status. Periode dihitung tgl 16 s/d 15 bulan depan.
+
+      <div class="tip-box">
+        <strong>Cara pakai</strong><br>
+        Ketuk tanggal untuk memilih status. Periode dihitung dari tgl 16 s/d 15 bulan berikutnya.
       </div>
     </div>
   </div>
 </div>
 
-<!-- CONTEXT MENU -->
+<!-- Context Menu -->
 <div class="ctx-menu" id="ctx-menu">
-  <div class="ctx-item" onclick="setStatus('hadir')">
-    <span class="ctx-icon">✓</span> Hadir Normal
-  </div>
-  <div class="ctx-item" onclick="setStatus('lembur')">
-    <span class="ctx-icon">⏰</span> Hadir + Lembur
-  </div>
-  <div class="ctx-divider"></div>
-  <div class="ctx-item" onclick="setStatus('libur')">
-    <span class="ctx-icon" style="color:var(--libur)">✦</span> Libur (hari libur)
-  </div>
-  <div class="ctx-item" onclick="setStatus('cuti')">
-    <span class="ctx-icon" style="color:var(--cuti)">✦</span> Libur Izin/Cuti/Sakit
-  </div>
-  <div class="ctx-divider"></div>
-  <div class="ctx-item danger" onclick="setStatus(null)">
-    <span class="ctx-icon">✕</span> Hapus Tanda
-  </div>
+  <div class="ctx-item" onclick="setStatus('hadir')"><span class="ctx-icon" style="color:#5a9e78">✓</span> Hadir Normal</div>
+  <div class="ctx-item" onclick="setStatus('lembur')"><span class="ctx-icon" style="color:var(--pink-d)">⏰</span> Hadir + Lembur</div>
+  <div class="ctx-div"></div>
+  <div class="ctx-item" onclick="setStatus('libur')"><span class="ctx-icon" style="color:#5a82b4">✦</span> Libur Resmi</div>
+  <div class="ctx-item" onclick="setStatus('cuti')"><span class="ctx-icon" style="color:var(--purple-d)">✦</span> Izin / Cuti / Sakit</div>
+  <div class="ctx-div"></div>
+  <div class="ctx-item danger" onclick="setStatus(null)"><span class="ctx-icon">✕</span> Hapus Tanda</div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- DEBUG PANEL -->
-<button id="debug-toggle" onclick="toggleDebug()" style="position:fixed;bottom:1.5rem;right:1.5rem;background:#1a1a1f;border:1px solid #2a2a32;color:#7a7670;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;z-index:9998;display:flex;align-items:center;justify-content:center;">🐛</button>
-
-<div id="debug-panel" style="display:none;position:fixed;bottom:4rem;right:1rem;width:min(380px,95vw);max-height:300px;overflow-y:auto;background:#0d0d0f;border:1px solid #2a2a32;padding:0.75rem 1rem;font-family:DM Mono,monospace;font-size:0.7rem;z-index:9997;">
-  <div style="color:#c9a84c;font-size:0.6rem;letter-spacing:0.2em;margin-bottom:0.5rem">DEBUG LOG ✦</div>
-  <div style="color:#7a7670;font-size:0.65rem">Belum ada log.</div>
+<button id="debug-toggle" onclick="toggleDebug()">🐛</button>
+<div id="debug-panel">
+  <div style="color:var(--pink);font-size:0.6rem;letter-spacing:0.15em;margin-bottom:6px">DEBUG LOG ✿</div>
+  <div id="debug-log" style="color:#b89ccc;font-size:0.65rem">Belum ada log.</div>
 </div>
 
 <script>
-// ============================
-// KONFIGURASI SUPABASE
-// Ganti dengan URL dan ANON KEY dari project Supabase Anda
-// ============================
-const SUPABASE_URL = 'https://rzynbnftppgpiofnqcuc.supabase.co'
+const SUPABASE_URL      = 'https://rzynbnftppgpiofnqcuc.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6eW5ibmZ0cHBncGlvZm5xY3VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzOTg3OTYsImV4cCI6MjA4Njk3NDc5Nn0.l0xS2NeZ8jf7M44kwkauh34iG5uWaBbGBU6braSiFdo'
 
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// STATE
-let currentUser = null
-let curre
+let currentUser  = null
+let currentDate  = new Date()
+let attendanceData = {}
+let selectedDate = null
+
+// DEBUG
+const logs = []
+function dbg(level, ctx, msg, detail) {
+  const t = new Date().toLocaleTimeString('id-ID')
+  logs.unshift({ t, level, ctx, msg, detail })
+  if (logs.length > 50) logs.pop()
+  const el = document.getElementById('debug-log')
+  if (!el) return
+  const c = { INFO:'#a8d4b8', WARN:'#e8c880', ERROR:'#e8a0a0' }
+  el.innerHTML = logs.slice(0,15).map(e =>
+    `<div style="border-bottom:1px solid #3a2a4a;padding:3px 0;color:${c[e.level]||'#b89ccc'}">
+      <span style="color:#6a4a7a">${e.t}</span>
+      <span style="color:#e8e0f0"> [${e.ctx}]</span> ${e.msg}
+      ${e.detail ? `<div style="color:#6a4a7a;word-break:break-all;padding-left:8px">${JSON.stringify(e.detail)}</div>` : ''}
+    </div>`
+  ).join('')
+}
+
+function toggleDebug() {
+  const p = document.getElementById('debug-panel')
+  const b = document.getElementById('debug-toggle')
+  const open = p.style.display === 'block'
+  p.style.display = open ? 'none' : 'block'
+  b.textContent = open ? '🐛' : '✕'
+}
+
+// AUTH
+async function login() {
+  const email = document.getElementById('email').value.trim()
+  const pw    = document.getElementById('password').value
+  if (!email || !pw) return showMsg('Isi semua kolom.', false)
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pw })
+  if (error) { dbg('ERROR','login','Gagal',error); return showMsg(error.message, false) }
+  dbg('INFO','login','OK: '+data.user.email)
+  onLogin(data.user)
+}
+
+async function register() {
+  const email = document.getElementById('reg-email').value.trim()
+  const pw    = document.getElementById('reg-password').value
+  if (!email || !pw) return showMsg('Isi semua kolom.', false)
+  if (pw.length < 6)  return showMsg('Kata sandi min. 6 karakter.', false)
+  const { error } = await db.auth.signUp({ email, password: pw })
+  if (error) return showMsg(error.message, false)
+  showMsg('✓ Akun dibuat! Silakan masuk.', true)
+  showLogin()
+}
+
+async function logout() {
+  await db.auth.signOut()
+  currentUser = null; attendanceData = {}
+  document.getElementById('auth-screen').style.display = 'flex'
+  document.getElementById('app').style.display = 'none'
+}
+
+function showRegister() {
+  document.getElementById('login-form').style.display = 'none'
+  document.getElementById('register-form').style.display = 'block'
+  clearMsg()
+}
+
+function showLogin() {
+  document.getElementById('login-form').style.display = 'block'
+  document.getElementById('register-form').style.display = 'none'
+  clearMsg()
+}
+
+function showMsg(msg, ok) {
+  const el = document.getElementById('auth-msg')
+  el.textContent = msg
+  el.style.color = ok ? '#5a9e78' : 'var(--red)'
+  el.style.display = 'block'
+}
+
+function clearMsg() { document.getElementById('auth-msg').style.display = 'none' }
+
+function onLogin(user) {
+  dbg('INFO','onLogin','User: '+user.email)
+  currentUser = user
+  document.getElementById('auth-screen').style.display = 'none'
+  document.getElementById('app').style.display = 'block'
+  document.getElementById('user-email-display').textContent = user.email
+  renderCalendar()
+  loadAttendance()
+}
+
+// PERIODE
+function getPeriode() {
+  const y = currentDate.getFullYear()
+  const m = currentDate.getMonth()
+  return { start: new Date(y, m, 16), end: new Date(y, m+1, 15) }
+}
+
+// DATABASE
+async function loadAttendance() {
+  const { start, end } = getPeriode()
+  const from = start.toLocaleDateString('sv-SE')
+  const to   = end.toLocaleDateString('sv-SE')
+  dbg('INFO','load',`${from} → ${to}`)
+  try {
+    const { data: s } = await db.auth.getSession()
+    dbg('INFO','auth','Session: '+(s?.session?.user?.id?.slice(0,8)||'none'))
+    const { data, error } = await db.from('attendance').select('date,status').gte('date',from).lte('date',to)
+    if (error) { dbg('ERROR','load','Query gagal',error); showToast('Gagal memuat data'); return }
+    dbg('INFO','load',`${data?.length??0} baris`)
+    attendanceData = {}
+    data?.forEach(r => { attendanceData[r.date] = r.status })
+    renderCalendar()
+  } catch(e) { dbg('ERROR','load','Exception',{msg:e.message}) }
+}
+
+async function saveAttendance(dateStr, status) {
+  dbg('INFO','save',`${dateStr} → ${status??'hapus'}`)
+  if (status === null) {
+    const { error } = await db.from('attendance').delete().eq('user_id',currentUser.id).eq('date',dateStr)
+    if (error) { dbg('ERROR','save','Hapus gagal',error); showToast('Gagal menghapus'); return }
+    delete attendanceData[dateStr]
+  } else {
+    const { error } = await db.from('attendance')
+      .upsert({ user_id: currentUser.id, date: dateStr, status }, { onConflict:'user_id,date' })
+    if (error) { dbg('ERROR','save','Simpan gagal',error); showToast('Gagal menyimpan'); return }
+    attendanceData[dateStr] = status
+  }
+  dbg('INFO','save','OK')
+  renderCalendar()
+  updateStats()
+}
+
+// CALENDAR
+const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+
+function renderCalendar() {
+  const today = new Date()
+  const { start, end } = getPeriode()
+  const lbl = `${start.getDate()} ${MN[start.getMonth()]} — ${end.getDate()} ${MN[end.getMonth()]} ${end.getFullYear()}`
+  document.getElementById('period-label').textContent = lbl
+
+  const grid = document.getElementById('cal-grid')
+  grid.innerHTML = ''
+
+  for (let i = 0; i < start.getDay(); i++) {
+    const e = document.createElement('div')
+    e.className = 'cal-cell empty'
+    grid.appendChild(e)
+  }
+
+  const cursor = new Date(start)
+  while (cursor <= end) {
+    const y = cursor.getFullYear()
+    const m = cursor.getMonth()
+    const d = cursor.getDate()
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const dow = cursor.getDay()
+    const isWE    = dow === 0 || dow === 6
+    const isToday = y === today.getFullYear() && m === today.getMonth() && d === today.getDate()
+    const status  = attendanceData[dateStr]
+
+    const cell = document.createElement('div')
+    cell.className = `cal-cell${isWE?' weekend':''}${isToday?' today':''}${status?' '+status:''}`
+
+    const monthTag = d === 1 ? `<div class="month-tag">${MN[m]}</div>` : ''
+    const dot = status ? `<div class="cal-dot"></div>` : ''
+    cell.innerHTML = `${monthTag}<span class="cal-date">${d}</span>${dot}`
+
+    cell.addEventListener('click', e => { e.stopPropagation(); openMenu(e, dateStr) })
+    cell.addEventListener('contextmenu', e => { e.preventDefault(); openMenu(e, dateStr) })
+
+    grid.appendChild(cell)
+    cursor.setDate(cursor.getDate() + 1)
+  }
+
+  updateStats()
+}
+
+function updateStats() {
+  const vals = Object.values(attendanceData)
+  const hadir  = vals.filter(v => v==='hadir').length
+  const lembur = vals.filter(v => v==='lembur').length
+  const libur  = vals.filter(v => v==='libur').length
+  const cuti   = vals.filter(v => v==='cuti').length
+
+  document.getElementById('stat-hadir').textContent  = hadir + lembur
+  document.getElementById('stat-lembur').textContent = lembur
+  document.getElementById('stat-libur').textContent  = libur
+  document.getElementById('stat-cuti').textContent   = cuti
+
+  const { start, end } = getPeriode()
+  document.getElementById('stat-periode').textContent =
+    `${start.getDate()} ${MN[start.getMonth()]} — ${end.getDate()} ${MN[end.getMonth()]} ${end.getFullYear()}`
+}
+
+async function changePeriode(dir) {
+  currentDate.setMonth(currentDate.getMonth() + dir)
+  attendanceData = {}
+  renderCalendar()
+  await loadAttendance()
+}
+
+// CONTEXT MENU
+function openMenu(e, dateStr) {
+  e.preventDefault()
+  selectedDate = dateStr
+  const menu = document.getElementById('ctx-menu')
+  menu.classList.add('show')
+  let x = e.clientX, y = e.clientY
+  if (x + 200 > window.innerWidth)  x = window.innerWidth - 205
+  if (y + 230 > window.innerHeight) y = window.innerHeight - 235
+  menu.style.left = x+'px'
+  menu.style.top  = y+'px'
+}
+
+function closeMenu() { document.getElementById('ctx-menu').classList.remove('show') }
+
+async function setStatus(status) {
+  if (!selectedDate) return
+  closeMenu()
+  await saveAttendance(selectedDate, status)
+  const labels = { hadir:'Ditandai: Hadir', lembur:'Ditandai: Lembur', libur:'Ditandai: Libur', cuti:'Ditandai: Cuti/Izin' }
+  showToast(status ? labels[status] : 'Tanda dihapus')
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('ctx-menu').contains(e.target)) closeMenu()
+})
+
+// TOAST
+let toastTimer
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.classList.add('show')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500)
+}
+
+// INIT
+db.auth.getSession().then(({ data: { session } }) => {
+  if (session) onLogin(session.user)
+})
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return
+  document.getElementById('register-form').style.display !== 'none' ? register() : login()
+})
+</script>
+</body>
+</html>
