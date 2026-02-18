@@ -553,10 +553,21 @@ header {
 
 /* Note Panel */
 .note-panel {
-  background: var(--c-cuti-bg);
+  background: var(--md-surface-container-lowest);
+  border: 1.5px solid var(--md-outline-variant);
   border-radius: var(--shape-xl);
   padding: 1rem 1.25rem;
-  animation: fadeUp 0.18s ease;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.note-panel.has-note {
+  background: var(--c-cuti-bg);
+  border-color: transparent;
+}
+
+.note-panel.has-lembur {
+  background: var(--c-lembur-bg);
+  border-color: transparent;
 }
 
 .note-panel-header {
@@ -564,20 +575,39 @@ header {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
 }
 
-.note-panel-header::before {
-  content: '🤒';
-  font-size: 1rem;
-}
+.note-panel.has-note .note-panel-header  { color: var(--c-cuti); }
+.note-panel.has-lembur .note-panel-header { color: var(--c-lembur); }
 
 .note-panel-body {
   font-size: 0.875rem;
-  color: var(--c-cuti);
+  color: var(--md-on-surface-variant);
   line-height: 1.55;
-  font-style: italic;
   word-break: break-word;
 }
+
+.note-panel.has-note .note-panel-body  { color: var(--c-cuti); font-style: italic; }
+.note-panel.has-lembur .note-panel-body { color: var(--c-lembur); }
+
+.note-empty { font-style: italic; opacity: 0.6; font-size: 0.8125rem; }
+
+.note-lembur-count {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--c-lembur);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.note-lembur-unit { font-size: 0.75rem; color: var(--c-lembur); opacity: 0.8; }
 
 /* ── M3 MENU (Context Menu) ── */
 .ctx-menu {
@@ -928,7 +958,7 @@ header {
         <div class="stat-card c-lembur">
           <div class="s-label">Lembur</div>
           <div class="s-val" id="stat-lembur">0</div>
-          <div class="s-unit">kali</div>
+          <div class="s-unit">kali lembur</div>
         </div>
         <div class="stat-card c-libur">
           <div class="s-label">Libur</div>
@@ -962,11 +992,14 @@ header {
         </div>
       </div>
 
-      <div class="note-panel" id="note-panel" style="display:none">
+      <div class="note-panel" id="note-panel">
         <div class="note-panel-header">
-          <span id="note-panel-date" style="font-family:'Google Sans',sans-serif;font-size:0.75rem;font-weight:500;color:var(--c-cuti)"></span>
+          <span id="note-panel-icon">📋</span>
+          <span id="note-panel-date" style="font-family:'Google Sans',sans-serif;font-size:0.75rem;font-weight:500"></span>
         </div>
-        <div class="note-panel-body" id="note-panel-body"></div>
+        <div class="note-panel-body" id="note-panel-body">
+          <span class="note-empty">Ketuk tanggal untuk melihat detail</span>
+        </div>
       </div>
 
       <div class="info-card">
@@ -988,6 +1021,34 @@ header {
     <div class="dialog-actions">
       <button class="dialog-btn-text" onclick="closeNoteDialog()">Batal</button>
       <button class="dialog-btn-filled" onclick="confirmCuti()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lembur Dialog -->
+<div class="dialog-scrim" id="lembur-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">⏰</div>
+    <div class="dialog-title">Lembur</div>
+    <div class="dialog-subtitle" id="lembur-dialog-date">—</div>
+    <div class="dialog-field" style="margin-bottom:0.75rem">
+      <label style="font-family:'Google Sans',sans-serif;font-size:0.75rem;font-weight:500;color:var(--md-on-surface-variant);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:0.5rem">Jumlah Lembur</label>
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <button onclick="adjustLembur(-1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--md-outline-variant);background:transparent;font-size:1.1rem;cursor:pointer;color:var(--c-lembur);display:flex;align-items:center;justify-content:center;transition:background 0.15s" onmouseover="this.style.background='rgba(139,74,107,0.08)'" onmouseout="this.style.background='transparent'">−</button>
+        <div style="flex:1;text-align:center">
+          <div id="lembur-count-display" style="font-family:'Google Sans Display',sans-serif;font-size:2.5rem;font-weight:400;color:var(--c-lembur);line-height:1">1</div>
+          <div style="font-size:0.7rem;color:var(--md-on-surface-variant);margin-top:2px">kali lembur</div>
+        </div>
+        <button onclick="adjustLembur(1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--md-outline-variant);background:transparent;font-size:1.1rem;cursor:pointer;color:var(--c-lembur);display:flex;align-items:center;justify-content:center;transition:background 0.15s" onmouseover="this.style.background='rgba(139,74,107,0.08)'" onmouseout="this.style.background='transparent'">+</button>
+      </div>
+    </div>
+    <div class="dialog-field">
+      <label style="font-family:'Google Sans',sans-serif;font-size:0.75rem;font-weight:500;color:var(--md-on-surface-variant);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:0.5rem">Keterangan <span style="opacity:0.5;font-weight:400;text-transform:none">(opsional)</span></label>
+      <textarea id="lembur-note-input" placeholder="Contoh: meeting klien, deadline project..."></textarea>
+    </div>
+    <div class="dialog-actions">
+      <button class="dialog-btn-text" onclick="closeLemburDialog()">Batal</button>
+      <button class="dialog-btn-filled" onclick="confirmLembur()">Simpan</button>
     </div>
   </div>
 </div>
@@ -1140,32 +1201,32 @@ async function loadAttendance() {
   try {
     const { data: s } = await db.auth.getSession()
     dbg('INFO','auth','Session: '+(s?.session?.user?.id?.slice(0,8)||'none'))
-    const { data, error } = await db.from('attendance').select('date,status,note').gte('date',from).lte('date',to)
+    const { data, error } = await db.from('attendance').select('date,status,note,lembur_count').gte('date',from).lte('date',to)
     if (error) { dbg('ERROR','load','Query gagal',error); showToast('Gagal memuat data'); return }
     dbg('INFO','load',`${data?.length??0} baris`)
     attendanceData = {}
-    data?.forEach(r => { attendanceData[r.date] = { status: r.status, note: r.note || '' } })
+    data?.forEach(r => { attendanceData[r.date] = { status: r.status, note: r.note || '', lembur_count: r.lembur_count ?? null } })
     renderCalendar()
   } catch(e) { dbg('ERROR','load','Exception',{msg:e.message}) }
 }
 
-async function saveAttendance(dateStr, status, note = '') {
-  dbg('INFO','save',`${dateStr} → ${status??'hapus'} note="${note}"`)
+async function saveAttendance(dateStr, status, note = '', lembur_count = null) {
+  dbg('INFO','save',`${dateStr} → ${status??'hapus'} note="${note}" lembur=${lembur_count}`)
   if (status === null) {
     const { error } = await db.from('attendance').delete().eq('user_id',currentUser.id).eq('date',dateStr)
     if (error) { dbg('ERROR','save','Hapus gagal',error); showToast('Gagal menghapus'); return }
     delete attendanceData[dateStr]
   } else {
-    const { error } = await db.from('attendance')
-      .upsert({ user_id: currentUser.id, date: dateStr, status, note }, { onConflict:'user_id,date' })
+    const payload = { user_id: currentUser.id, date: dateStr, status, note: note || null }
+    if (lembur_count !== null) payload.lembur_count = lembur_count
+    const { error } = await db.from('attendance').upsert(payload, { onConflict:'user_id,date' })
     if (error) { dbg('ERROR','save','Simpan gagal',error); showToast('Gagal menyimpan'); return }
-    attendanceData[dateStr] = { status, note }
+    attendanceData[dateStr] = { status, note: note || '', lembur_count }
   }
   dbg('INFO','save','OK')
   renderCalendar()
   updateStats()
-  // Update note panel jika sedang menampilkan tanggal ini
-  if (typeof showNotePanel === 'function') showNotePanel(dateStr)
+  showNotePanel(dateStr)
 }
 
 // ── CALENDAR ──
@@ -1220,9 +1281,14 @@ function renderCalendar() {
 }
 
 function updateStats() {
-  const statuses = Object.values(attendanceData).map(e => e?.status ?? e)
+  const entries = Object.values(attendanceData)
+  const statuses = entries.map(e => e?.status ?? e)
+  // Lembur: total kali (sum lembur_count), bukan jumlah hari
+  const totalLembur = entries
+    .filter(e => e?.status === 'lembur')
+    .reduce((sum, e) => sum + (e.lembur_count ?? 1), 0)
   document.getElementById('stat-hadir').textContent  = statuses.filter(s=>s==='hadir').length + statuses.filter(s=>s==='lembur').length
-  document.getElementById('stat-lembur').textContent = statuses.filter(s=>'lembur'===s).length
+  document.getElementById('stat-lembur').textContent = totalLembur
   document.getElementById('stat-libur').textContent  = statuses.filter(s=>'libur'===s).length
   document.getElementById('stat-cuti').textContent   = statuses.filter(s=>'cuti'===s).length
   const { start, end } = getPeriode()
@@ -1270,17 +1336,46 @@ function openMenu(e, dateStr) {
 function closeMenu() { document.getElementById('ctx-menu').classList.remove('show') }
 
 function showNotePanel(dateStr) {
+  const panel  = document.getElementById('note-panel')
+  const icon   = document.getElementById('note-panel-icon')
+  const dateEl = document.getElementById('note-panel-date')
+  const body   = document.getElementById('note-panel-body')
+
+  panel.className = 'note-panel'
+  panel.style.display = 'block'
+
   const entry = attendanceData[dateStr]
-  const panel = document.getElementById('note-panel')
-  if (!entry || entry.status !== 'cuti' || !entry.note) {
-    panel.style.display = 'none'
+  if (!entry) {
+    icon.textContent = '📋'
+    dateEl.textContent = 'Detail'
+    body.innerHTML = '<span class="note-empty">Ketuk tanggal untuk melihat detail</span>'
     return
   }
+
   const MN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
   const [y, m, d] = dateStr.split('-')
-  document.getElementById('note-panel-date').textContent = `${parseInt(d)} ${MN_FULL[parseInt(m)-1]} ${y}`
-  document.getElementById('note-panel-body').textContent = entry.note
-  panel.style.display = 'block'
+  const tgl = `${parseInt(d)} ${MN_FULL[parseInt(m)-1]} ${y}`
+
+  if (entry.status === 'cuti') {
+    panel.classList.add('has-note')
+    icon.textContent = '🤒'
+    dateEl.textContent = tgl
+    body.innerHTML = entry.note
+      ? `<em>${entry.note}</em>`
+      : '<span class="note-empty">Tidak ada keterangan</span>'
+  } else if (entry.status === 'lembur') {
+    panel.classList.add('has-lembur')
+    icon.textContent = '⏰'
+    dateEl.textContent = tgl
+    const cnt = entry.lembur_count ?? 1
+    body.innerHTML = `<div class="note-lembur-count">${cnt}×</div><div class="note-lembur-unit">kali lembur</div>${entry.note ? `<div style="margin-top:0.5rem;font-style:italic">${entry.note}</div>` : ''}`
+  } else {
+    const icons = { hadir:'✓', libur:'🌿' }
+    const labels = { hadir:'Hadir Normal', libur:'Libur Resmi' }
+    icon.textContent = icons[entry.status] || '📋'
+    dateEl.textContent = tgl
+    body.innerHTML = `<span style="opacity:0.7">${labels[entry.status] || ''}</span>`
+  }
 }
 
 // Reposition menu on scroll so it stays anchored to the cell
@@ -1302,14 +1397,18 @@ async function setStatus(status) {
   if (!selectedDate) return
   closeMenu()
 
-  // Cuti/izin/sakit → minta keterangan dulu via dialog
   if (status === 'cuti') {
     openNoteDialog(selectedDate)
     return
   }
 
-  await saveAttendance(selectedDate, status, null)
-  const labels = { hadir:'Hadir', lembur:'Hadir + Lembur', libur:'Libur Resmi' }
+  if (status === 'lembur') {
+    openLemburDialog(selectedDate)
+    return
+  }
+
+  await saveAttendance(selectedDate, status, null, null)
+  const labels = { hadir:'Hadir', libur:'Libur Resmi' }
   showToast(status ? `Ditandai: ${labels[status]}` : 'Tanda dihapus')
 }
 
@@ -1340,6 +1439,46 @@ async function confirmCuti() {
   await saveAttendance(dateToSave, 'cuti', note)
   showToast('Ditandai: Izin/Cuti/Sakit')
 }
+
+// ── LEMBUR DIALOG ──
+let pendingLemburDate = null
+let lemburCount = 1
+
+function openLemburDialog(dateStr) {
+  pendingLemburDate = dateStr
+  const MN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+  const [y, m, d] = dateStr.split('-')
+  document.getElementById('lembur-dialog-date').textContent = `${parseInt(d)} ${MN_FULL[parseInt(m)-1]} ${y}`
+  const existing = attendanceData[dateStr]
+  lemburCount = existing?.lembur_count ?? 1
+  document.getElementById('lembur-count-display').textContent = lemburCount
+  document.getElementById('lembur-note-input').value = existing?.note || ''
+  document.getElementById('lembur-dialog').classList.add('show')
+}
+
+function closeLemburDialog() {
+  document.getElementById('lembur-dialog').classList.remove('show')
+  pendingLemburDate = null
+}
+
+function adjustLembur(delta) {
+  lemburCount = Math.max(1, Math.min(10, lemburCount + delta))
+  document.getElementById('lembur-count-display').textContent = lemburCount
+}
+
+async function confirmLembur() {
+  if (!pendingLemburDate) return
+  const dateToSave = pendingLemburDate
+  const note = document.getElementById('lembur-note-input').value.trim()
+  const count = lemburCount
+  closeLemburDialog()
+  await saveAttendance(dateToSave, 'lembur', note, count)
+  showToast(`Lembur ${count}× dicatat`)
+}
+
+document.getElementById('lembur-dialog').addEventListener('click', e => {
+  if (e.target === document.getElementById('lembur-dialog')) closeLemburDialog()
+})
 
 document.addEventListener('click', e => {
   if (!document.getElementById('ctx-menu').contains(e.target)) closeMenu()
