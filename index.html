@@ -723,23 +723,29 @@ function onLogin(user) {
 async function loadAttendance() {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth() + 1
-  const monthStr = `${year}-${String(month).padStart(2,'0')}`
+  const firstDay = `${year}-${String(month).padStart(2,'0')}-01`
+  const lastDay = `${year}-${String(month).padStart(2,'0')}-31`
 
   try {
+    // Ambil session terbaru langsung dari Supabase
+    const { data: sessionData } = await db.auth.getSession()
+    console.log('Session saat load:', sessionData?.session?.user?.id)
+
     const { data, error } = await db
       .from('attendance')
       .select('date, status')
-      .eq('user_id', currentUser.id)
-      .like('date', `${monthStr}-%`)
+      .gte('date', firstDay)
+      .lte('date', lastDay)
 
-    if (error) { console.error('Supabase error:', error); return }
+    console.log('Data dari Supabase:', data, 'Error:', error)
+
+    if (error) { console.error('Supabase error:', error); showToast('Gagal memuat data'); return }
 
     attendanceData = {}
-    data.forEach(row => { attendanceData[row.date] = row.status })
-    // Update kalender dengan data absensi setelah dapat dari server
+    if (data) data.forEach(row => { attendanceData[row.date] = row.status })
     renderCalendar()
   } catch(e) {
-    console.error('Koneksi gagal, kalender tetap tampil tanpa data:', e)
+    console.error('Koneksi gagal:', e)
   }
 }
 
