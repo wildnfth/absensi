@@ -671,7 +671,6 @@ async function login() {
   if (error) { dbg("ERROR", "login", "Login gagal", error); return showAuthError(error.message) }
   dbg("INFO", "login", "Login berhasil: " + data.user.email)
   onLogin(data.user)
-  onLogin(data.user)
 }
 
 async function register() {
@@ -716,8 +715,8 @@ function clearAuthError() {
   document.getElementById('auth-error').style.display = 'none'
 }
 
+function onLogin(user) {
   dbg("INFO", "onLogin", "User masuk: " + user.email)
-  currentUser = user
   currentUser = user
   document.getElementById('auth-screen').style.display = 'none'
   document.getElementById('app').style.display = 'block'
