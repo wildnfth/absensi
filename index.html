@@ -739,7 +739,7 @@ async function loadAttendance() {
 
     console.log('Data dari Supabase:', data, 'Error:', error)
 
-    if (error) { console.error('Supabase error:', error); showToast('Gagal memuat data'); return }
+    if (error) { alert('ERROR: ' + JSON.stringify(error)); showToast('Gagal memuat data'); return }
 
     attendanceData = {}
     if (data) data.forEach(row => { attendanceData[row.date] = row.status })
