@@ -801,7 +801,7 @@ function renderCalendar() {
     cell.className = `cal-cell${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${status ? ' ' + status : ''}`
     cell.innerHTML = `<span class="cal-date">${d}</span>${status ? '<div class="cal-dot"></div>' : ''}`
 
-    cell.addEventListener('click', (e) => openMenu(e, dateStr))
+    cell.addEventListener('click', (e) => { e.stopPropagation(); openMenu(e, dateStr) })
     cell.addEventListener('contextmenu', (e) => { e.preventDefault(); openMenu(e, dateStr) })
 
     grid.appendChild(cell)
@@ -817,9 +817,11 @@ function updateStats() {
   document.getElementById('stat-lembur').textContent = lembur
 }
 
-function changeMonth(dir) {
+async function changeMonth(dir) {
   currentDate.setMonth(currentDate.getMonth() + dir)
-  loadAttendance()
+  attendanceData = {}
+  renderCalendar()
+  await loadAttendance()
 }
 
 // ============================
