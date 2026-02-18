@@ -623,6 +623,139 @@ header {
 
 .toast.show { transform: translateX(-50%) translateY(0); }
 
+/* ── NOTE DIALOG (M3 Basic Dialog) ── */
+.dialog-scrim {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.32);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.dialog-scrim.show { display: flex; animation: scrimIn 0.15s ease; }
+
+@keyframes scrimIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.dialog {
+  background: var(--md-surface-container-high);
+  border-radius: 28px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 12px 40px rgba(0,0,0,0.12);
+  animation: dialogIn 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes dialogIn {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.dialog-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--c-cuti-bg);
+  color: var(--c-cuti);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  margin: 0 auto 1rem;
+}
+
+.dialog-title {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--md-on-surface);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.dialog-subtitle {
+  font-size: 0.8125rem;
+  color: var(--md-on-surface-variant);
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.dialog-field {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.dialog-field textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.875rem 1rem;
+  background: var(--md-surface-container-lowest);
+  border: 1px solid var(--md-outline);
+  border-radius: var(--shape-sm);
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.9375rem;
+  color: var(--md-on-surface);
+  resize: none;
+  outline: none;
+  transition: border-color 0.15s, border-width 0.15s;
+  line-height: 1.5;
+}
+
+.dialog-field textarea:focus {
+  border-color: var(--md-primary);
+  border-width: 2px;
+}
+
+.dialog-field textarea::placeholder { color: var(--md-on-surface-variant); opacity: 0.6; }
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dialog-btn-text {
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  color: var(--md-primary);
+  border: none;
+  border-radius: var(--shape-full);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dialog-btn-text:hover { background: rgba(139,74,107,0.08); }
+
+.dialog-btn-filled {
+  padding: 0.625rem 1.25rem;
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  border: none;
+  border-radius: var(--shape-full);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.dialog-btn-filled:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.1); }
+
+/* Note tooltip on calendar cell */
+.cal-cell .note-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--c-cuti);
+  position: absolute;
+  bottom: 4px; right: 4px;
+}
+
 /* ── DEBUG ── */
 #debug-toggle {
   position: fixed; bottom: 1rem; right: 1rem;
@@ -808,6 +941,22 @@ header {
   </div>
 </div>
 
+<!-- Note Dialog -->
+<div class="dialog-scrim" id="note-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">🤒</div>
+    <div class="dialog-title">Keterangan</div>
+    <div class="dialog-subtitle" id="note-dialog-date">—</div>
+    <div class="dialog-field">
+      <textarea id="note-input" placeholder="Contoh: demam, urusan keluarga, cuti tahunan..."></textarea>
+    </div>
+    <div class="dialog-actions">
+      <button class="dialog-btn-text" onclick="closeNoteDialog()">Batal</button>
+      <button class="dialog-btn-filled" onclick="confirmCuti()">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <!-- M3 Menu -->
 <div class="ctx-menu" id="ctx-menu">
   <div class="ctx-item" onclick="setStatus('hadir')">
@@ -956,26 +1105,26 @@ async function loadAttendance() {
   try {
     const { data: s } = await db.auth.getSession()
     dbg('INFO','auth','Session: '+(s?.session?.user?.id?.slice(0,8)||'none'))
-    const { data, error } = await db.from('attendance').select('date,status').gte('date',from).lte('date',to)
+    const { data, error } = await db.from('attendance').select('date,status,note').gte('date',from).lte('date',to)
     if (error) { dbg('ERROR','load','Query gagal',error); showToast('Gagal memuat data'); return }
     dbg('INFO','load',`${data?.length??0} baris`)
     attendanceData = {}
-    data?.forEach(r => { attendanceData[r.date] = r.status })
+    data?.forEach(r => { attendanceData[r.date] = { status: r.status, note: r.note || '' } })
     renderCalendar()
   } catch(e) { dbg('ERROR','load','Exception',{msg:e.message}) }
 }
 
-async function saveAttendance(dateStr, status) {
-  dbg('INFO','save',`${dateStr} → ${status??'hapus'}`)
+async function saveAttendance(dateStr, status, note = '') {
+  dbg('INFO','save',`${dateStr} → ${status??'hapus'} note="${note}"`)
   if (status === null) {
     const { error } = await db.from('attendance').delete().eq('user_id',currentUser.id).eq('date',dateStr)
     if (error) { dbg('ERROR','save','Hapus gagal',error); showToast('Gagal menghapus'); return }
     delete attendanceData[dateStr]
   } else {
     const { error } = await db.from('attendance')
-      .upsert({ user_id: currentUser.id, date: dateStr, status }, { onConflict:'user_id,date' })
+      .upsert({ user_id: currentUser.id, date: dateStr, status, note }, { onConflict:'user_id,date' })
     if (error) { dbg('ERROR','save','Simpan gagal',error); showToast('Gagal menyimpan'); return }
-    attendanceData[dateStr] = status
+    attendanceData[dateStr] = { status, note }
   }
   dbg('INFO','save','OK')
   renderCalendar()
@@ -1010,14 +1159,18 @@ function renderCalendar() {
     const dow = cursor.getDay()
     const isWE    = dow === 0 || dow === 6
     const isToday = y === today.getFullYear() && m === today.getMonth() && d === today.getDate()
-    const status  = attendanceData[dateStr]
+    const entry  = attendanceData[dateStr]
+    const status = entry?.status
+    const note   = entry?.note || ''
 
     const cell = document.createElement('div')
     cell.className = `cal-cell${isWE?' weekend':''}${isToday&&!status?' today':''}${status?' '+status:''}`
 
     const badge = d === 1 ? `<div class="month-badge">${MN[m]}</div>` : ''
     const dot   = status ? `<div class="cal-dot"></div>` : ''
-    cell.innerHTML = `${badge}<span class="cal-date">${d}</span>${dot}`
+    const noteDot = (status === 'cuti' && note) ? `<div class="note-dot"></div>` : ''
+    cell.innerHTML = `${badge}<span class="cal-date">${d}</span>${dot}${noteDot}`
+    if (note) cell.title = note
 
     cell.addEventListener('click', e => { e.stopPropagation(); openMenu(e, dateStr) })
     cell.addEventListener('contextmenu', e => { e.preventDefault(); openMenu(e, dateStr) })
@@ -1030,11 +1183,11 @@ function renderCalendar() {
 }
 
 function updateStats() {
-  const vals = Object.values(attendanceData)
-  document.getElementById('stat-hadir').textContent  = vals.filter(v=>v==='hadir').length + vals.filter(v=>v==='lembur').length
-  document.getElementById('stat-lembur').textContent = vals.filter(v=>v==='lembur').length
-  document.getElementById('stat-libur').textContent  = vals.filter(v=>v==='libur').length
-  document.getElementById('stat-cuti').textContent   = vals.filter(v=>v==='cuti').length
+  const statuses = Object.values(attendanceData).map(e => e?.status ?? e)
+  document.getElementById('stat-hadir').textContent  = statuses.filter(s=>s==='hadir').length + statuses.filter(s=>s==='lembur').length
+  document.getElementById('stat-lembur').textContent = statuses.filter(s=>'lembur'===s).length
+  document.getElementById('stat-libur').textContent  = statuses.filter(s=>'libur'===s).length
+  document.getElementById('stat-cuti').textContent   = statuses.filter(s=>'cuti'===s).length
   const { start, end } = getPeriode()
   document.getElementById('stat-periode').textContent =
     `${start.getDate()} ${MN[start.getMonth()]} — ${end.getDate()} ${MN[end.getMonth()]} ${end.getFullYear()}`
@@ -1053,25 +1206,101 @@ function openMenu(e, dateStr) {
   selectedDate = dateStr
   const menu = document.getElementById('ctx-menu')
   menu.classList.add('show')
-  let x = e.clientX, y = e.clientY
-  if (x + 210 > window.innerWidth)  x = window.innerWidth - 215
-  if (y + 240 > window.innerHeight) y = window.innerHeight - 245
-  menu.style.left = x+'px'
-  menu.style.top  = y+'px'
+
+  // Anchor to the cell element (sticky to tanggal, not cursor)
+  const cell = e.currentTarget
+  const rect = cell.getBoundingClientRect()
+  const menuW = 210, menuH = 240
+
+  // Prefer below-right of cell
+  let x = rect.left
+  let y = rect.bottom + 4
+
+  // Flip left if overflows right
+  if (x + menuW > window.innerWidth)  x = rect.right - menuW
+  // Flip above if overflows bottom
+  if (y + menuH > window.innerHeight) y = rect.top - menuH - 4
+
+  // Store anchor so we can reposition on scroll
+  menu._anchorCell = cell
+  menu._offsetX    = x - rect.left
+  menu._offsetY    = y - rect.bottom
+
+  menu.style.left = x + 'px'
+  menu.style.top  = y + 'px'
 }
 
 function closeMenu() { document.getElementById('ctx-menu').classList.remove('show') }
 
+// Reposition menu on scroll so it stays anchored to the cell
+document.addEventListener('scroll', () => {
+  const menu = document.getElementById('ctx-menu')
+  if (!menu.classList.contains('show') || !menu._anchorCell) return
+  const rect = menu._anchorCell.getBoundingClientRect()
+  const menuW = 210, menuH = 240
+  let x = rect.left + menu._offsetX
+  let y = rect.bottom + menu._offsetY
+  if (x + menuW > window.innerWidth)  x = rect.right - menuW
+  if (y + menuH > window.innerHeight) y = rect.top - menuH - 4
+  if (y < 0) y = rect.bottom + 4
+  menu.style.left = x + 'px'
+  menu.style.top  = y + 'px'
+}, true)
+
 async function setStatus(status) {
   if (!selectedDate) return
   closeMenu()
-  await saveAttendance(selectedDate, status)
-  const labels = { hadir:'Hadir', lembur:'Hadir + Lembur', libur:'Libur Resmi', cuti:'Izin/Cuti/Sakit' }
+
+  // Cuti/izin/sakit → minta keterangan dulu via dialog
+  if (status === 'cuti') {
+    openNoteDialog(selectedDate)
+    return
+  }
+
+  await saveAttendance(selectedDate, status, null)
+  const labels = { hadir:'Hadir', lembur:'Hadir + Lembur', libur:'Libur Resmi' }
   showToast(status ? `Ditandai: ${labels[status]}` : 'Tanda dihapus')
+}
+
+// ── NOTE DIALOG ──
+let pendingNoteDate = null
+
+function openNoteDialog(dateStr) {
+  pendingNoteDate = dateStr
+  const MN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+  const [y, m, d] = dateStr.split('-')
+  document.getElementById('note-dialog-date').textContent = `${parseInt(d)} ${MN_FULL[parseInt(m)-1]} ${y}`
+  // Pre-fill existing note if any
+  document.getElementById('note-input').value = attendanceData[dateStr]?.note || ''
+  document.getElementById('note-dialog').classList.add('show')
+  setTimeout(() => document.getElementById('note-input').focus(), 200)
+}
+
+function closeNoteDialog() {
+  document.getElementById('note-dialog').classList.remove('show')
+  pendingNoteDate = null
+}
+
+async function confirmCuti() {
+  if (!pendingNoteDate) return
+  const note = document.getElementById('note-input').value.trim()
+  closeNoteDialog()
+  await saveAttendance(pendingNoteDate, 'cuti', note)
+  showToast('Ditandai: Izin/Cuti/Sakit')
 }
 
 document.addEventListener('click', e => {
   if (!document.getElementById('ctx-menu').contains(e.target)) closeMenu()
+})
+
+// Close note dialog on scrim click
+document.getElementById('note-dialog').addEventListener('click', e => {
+  if (e.target === document.getElementById('note-dialog')) closeNoteDialog()
+})
+
+// Enter key in note textarea = confirm
+document.getElementById('note-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) confirmCuti()
 })
 
 // ── TOAST ──
