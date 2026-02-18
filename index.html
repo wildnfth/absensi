@@ -19,7 +19,9 @@
     --text-dim: #7a7670;
     --hadir: #4caf7d;
     --lembur: #c9a84c;
-    --libur: #444;
+    --libur: #5b8dd9;
+    --cuti: #b06cc4;
+    --periode: rgba(201,168,76,0.06);
     --red: #e05a5a;
   }
 
@@ -418,8 +420,40 @@
     border-color: rgba(201, 168, 76, 0.35);
   }
 
+  .cal-cell.libur {
+    background: rgba(91, 141, 217, 0.12);
+    border-color: rgba(91, 141, 217, 0.3);
+  }
+
+  .cal-cell.cuti {
+    background: rgba(176, 108, 196, 0.12);
+    border-color: rgba(176, 108, 196, 0.3);
+  }
+
   .cal-cell.hadir .cal-date { color: var(--hadir); }
   .cal-cell.lembur .cal-date { color: var(--lembur); }
+  .cal-cell.libur .cal-date { color: var(--libur); }
+  .cal-cell.cuti .cal-date { color: var(--cuti); }
+
+  .cal-cell.hadir .cal-dot { background: var(--hadir); }
+  .cal-cell.lembur .cal-dot { background: var(--lembur); }
+  .cal-cell.libur .cal-dot { background: var(--libur); }
+  .cal-cell.cuti .cal-dot { background: var(--cuti); }
+
+  .cal-cell.in-periode {
+    background: var(--periode);
+  }
+
+  .periode-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    opacity: 0.7;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0.3rem 0 0;
+    grid-column: 1 / -1;
+  }
 
   .cal-dot {
     width: 4px; height: 4px;
@@ -584,34 +618,40 @@
 
     <!-- STATS -->
     <div class="stats-panel">
+      <div class="stat-card" style="border-left:3px solid var(--accent);background:var(--surface)">
+        <div class="stat-label">Periode Gaji</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--accent)" id="stat-periode">—</div>
+      </div>
       <div class="stat-card hadir">
         <div class="stat-label">Hari Masuk</div>
         <div class="stat-value" id="stat-hadir">0</div>
-        <div class="stat-unit">hari bulan ini</div>
+        <div class="stat-unit">hari periode ini</div>
       </div>
       <div class="stat-card lembur">
         <div class="stat-label">Lembur</div>
         <div class="stat-value" id="stat-lembur">0</div>
-        <div class="stat-unit">kali bulan ini</div>
+        <div class="stat-unit">kali periode ini</div>
+      </div>
+      <div class="stat-card" style="border-left:3px solid var(--libur);background:var(--surface)">
+        <div class="stat-label">Libur Resmi</div>
+        <div class="stat-value" id="stat-libur" style="color:var(--libur)">0</div>
+        <div class="stat-unit">hari periode ini</div>
+      </div>
+      <div class="stat-card" style="border-left:3px solid var(--cuti);background:var(--surface)">
+        <div class="stat-label">Izin / Cuti / Sakit</div>
+        <div class="stat-value" id="stat-cuti" style="color:var(--cuti)">0</div>
+        <div class="stat-unit">hari periode ini</div>
       </div>
       <div class="legend">
         <div class="legend-title">Keterangan</div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--hadir)"></div>
-          Hadir Normal
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--lembur)"></div>
-          Hadir + Lembur
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--border)"></div>
-          Tidak ditandai
-        </div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--hadir)"></div>Hadir Normal</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--lembur)"></div>Hadir + Lembur</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--libur)"></div>Libur Resmi</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cuti)"></div>Izin / Cuti / Sakit</div>
       </div>
       <div class="instruction">
         <strong>Cara pakai:</strong><br>
-        Klik kanan tanggal untuk menandai kehadiran. Klik kiri untuk membuka menu pilihan.
+        Klik tanggal → pilih status. Periode dihitung tgl 16 s/d 15 bulan depan.
       </div>
     </div>
   </div>
@@ -620,10 +660,17 @@
 <!-- CONTEXT MENU -->
 <div class="ctx-menu" id="ctx-menu">
   <div class="ctx-item" onclick="setStatus('hadir')">
-    <span class="ctx-icon">✓</span> Tandai Hadir
+    <span class="ctx-icon">✓</span> Hadir Normal
   </div>
   <div class="ctx-item" onclick="setStatus('lembur')">
     <span class="ctx-icon">⏰</span> Hadir + Lembur
+  </div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item" onclick="setStatus('libur')">
+    <span class="ctx-icon" style="color:var(--libur)">✦</span> Libur (hari libur)
+  </div>
+  <div class="ctx-item" onclick="setStatus('cuti')">
+    <span class="ctx-icon" style="color:var(--cuti)">✦</span> Libur Izin/Cuti/Sakit
   </div>
   <div class="ctx-divider"></div>
   <div class="ctx-item danger" onclick="setStatus(null)">
@@ -768,9 +815,11 @@ function toggleDebug() {
 async function loadAttendance() {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth() + 1
-  const firstDay = `${year}-${String(month).padStart(2,'0')}-01`
-  const lastDayNum = new Date(year, month, 0).getDate()
-  const lastDay = `${year}-${String(month).padStart(2,'0')}-${String(lastDayNum).padStart(2,'0')}`
+  // Muat dari tgl 16 bulan ini s/d 15 bulan depan (periode gaji)
+  const periodeStart = new Date(year, month - 1, 16)
+  const periodeEnd = new Date(year, month, 15)
+  const firstDay = periodeStart.toISOString().slice(0,10)
+  const lastDay = periodeEnd.toISOString().slice(0,10)
 
   dbg('INFO', 'loadAttendance', `Memuat ${firstDay} s/d ${lastDay}`)
 
@@ -864,8 +913,9 @@ function renderCalendar() {
     const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d
     const status = attendanceData[dateStr]
 
+    const isInPeriode = inPeriode(dateStr)
     const cell = document.createElement('div')
-    cell.className = `cal-cell${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${status ? ' ' + status : ''}`
+    cell.className = `cal-cell${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${status ? ' ' + status : ''}${isInPeriode && !status ? ' in-periode' : ''}`
     cell.innerHTML = `<span class="cal-date">${d}</span>${status ? '<div class="cal-dot"></div>' : ''}`
 
     cell.addEventListener('click', (e) => { e.stopPropagation(); openMenu(e, dateStr) })
@@ -877,11 +927,41 @@ function renderCalendar() {
   updateStats()
 }
 
+function getPeriode() {
+  // Periode: tgl 16 bulan currentDate s/d 15 bulan berikutnya
+  const y = currentDate.getFullYear()
+  const m = currentDate.getMonth()
+  const start = new Date(y, m, 16)
+  const end = new Date(y, m + 1, 15)
+  return { start, end }
+}
+
+function inPeriode(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00')
+  const { start, end } = getPeriode()
+  return d >= start && d <= end
+}
+
 function updateStats() {
-  const hadir = Object.values(attendanceData).filter(v => v === 'hadir').length
-  const lembur = Object.values(attendanceData).filter(v => v === 'lembur').length
+  const periodeVals = Object.entries(attendanceData)
+    .filter(([date]) => inPeriode(date))
+    .map(([, v]) => v)
+
+  const hadir = periodeVals.filter(v => v === 'hadir').length
+  const lembur = periodeVals.filter(v => v === 'lembur').length
+  const libur = periodeVals.filter(v => v === 'libur').length
+  const cuti = periodeVals.filter(v => v === 'cuti').length
+
   document.getElementById('stat-hadir').textContent = hadir + lembur
   document.getElementById('stat-lembur').textContent = lembur
+  document.getElementById('stat-libur').textContent = libur
+  document.getElementById('stat-cuti').textContent = cuti
+
+  // Label periode
+  const { start, end } = getPeriode()
+  const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  const label = `${start.getDate()} ${MONTHS[start.getMonth()]} — ${end.getDate()} ${MONTHS[end.getMonth()]} ${end.getFullYear()}`
+  document.getElementById('stat-periode').textContent = label
 }
 
 async function changeMonth(dir) {
@@ -915,7 +995,7 @@ async function setStatus(status) {
   if (!selectedDate) return
   closeMenu()
   await saveAttendance(selectedDate, status)
-  const labels = { hadir: 'Ditandai: Hadir', lembur: 'Ditandai: Lembur', null: 'Tanda dihapus' }
+  const labels = { hadir: 'Ditandai: Hadir', lembur: 'Ditandai: Lembur', libur: 'Ditandai: Libur Resmi', cuti: 'Ditandai: Izin/Cuti/Sakit' }
   showToast(status ? labels[status] : 'Tanda dihapus')
 }
 
