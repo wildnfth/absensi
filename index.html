@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Absensi — Laurent</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -30,20 +30,25 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Mono', monospace;
+    font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(232,160,192,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(196,120,154,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 60% 10%, rgba(168,136,200,0.07) 0%, transparent 40%);
   }
 
-  /* NOISE TEXTURE */
+  /* DOT PATTERN */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    background-image: radial-gradient(circle, rgba(196,120,154,0.15) 1px, transparent 1px);
+    background-size: 28px 28px;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.4;
+    opacity: 0.5;
   }
 
   /* AUTH SCREEN */
@@ -62,41 +67,38 @@
     width: min(420px, 92vw);
     background: var(--surface);
     position: relative;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
   }
 
   .auth-card::before {
-    content: '';
+    content: '✿';
     position: absolute;
-    top: -1px; left: -1px;
-    width: 40px; height: 40px;
-    border-top: 2px solid var(--accent);
-    border-left: 2px solid var(--accent);
-  }
-
-  .auth-card::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; right: -1px;
-    width: 40px; height: 40px;
-    border-bottom: 2px solid var(--accent);
-    border-right: 2px solid var(--accent);
+    top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    color: var(--accent);
+    padding: 0 12px;
+    font-size: 1.2rem;
+    line-height: 1;
   }
 
   .brand {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.2rem;
-    font-weight: 300;
-    letter-spacing: 0.1em;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
     color: var(--accent);
     margin-bottom: 0.3rem;
   }
 
   .brand-sub {
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
     color: var(--text-dim);
     text-transform: uppercase;
     margin-bottom: 2.5rem;
+    font-family: 'DM Sans', sans-serif;
   }
 
   .form-group { margin-bottom: 1.2rem; }
@@ -113,49 +115,57 @@
   .form-group input {
     width: 100%;
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     color: var(--text);
     padding: 0.75rem 1rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    border-radius: 12px;
   }
 
-  .form-group input:focus { border-color: var(--accent); }
+  .form-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196,120,154,0.12);
+  }
 
   .btn {
     width: 100%;
     padding: 0.85rem;
-    background: var(--accent);
-    color: var(--bg);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
     border: none;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
     margin-top: 0.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(196,120,154,0.3);
   }
 
-  .btn:hover { background: var(--accent2); }
+  .btn:hover { opacity: 0.9; box-shadow: 0 6px 16px rgba(196,120,154,0.4); }
   .btn:active { transform: scale(0.99); }
 
   .btn-ghost {
     background: transparent;
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     color: var(--text-dim);
     margin-top: 0.75rem;
+    box-shadow: none;
   }
 
-  .btn-ghost:hover { border-color: var(--text-dim); background: transparent; color: var(--text); }
+  .btn-ghost:hover { border-color: var(--accent); background: transparent; color: var(--accent); }
 
   .auth-error {
-    color: var(--red);
-    font-size: 0.75rem;
+    color: #d4607a;
+    font-size: 0.78rem;
     margin-top: 1rem;
     display: none;
+    font-family: 'DM Sans', sans-serif;
   }
 
   /* MAIN APP */
@@ -202,18 +212,17 @@
 
   .btn-logout {
     background: transparent;
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     color: var(--text-dim);
     padding: 0.4rem 1rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
     cursor: pointer;
     transition: all 0.2s;
+    border-radius: 20px;
   }
 
-  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+  .btn-logout:hover { border-color: var(--accent); color: var(--accent); }
 
   /* LAYOUT */
   .main-layout {
@@ -248,17 +257,19 @@
   }
 
   .nav-btn {
-    background: transparent;
-    border: 1px solid var(--border);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
     color: var(--text-dim);
     width: 36px; height: 36px;
     cursor: pointer;
     font-size: 1rem;
     transition: all 0.2s;
     display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
   }
 
-  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--surface2); }
 
   .stat-card {
     background: var(--surface);
@@ -304,16 +315,19 @@
   /* LEGEND */
   .legend {
     background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.25rem 1.5rem;
+    border: 1.5px solid var(--border);
+    padding: 1.1rem 1.25rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
   }
 
   .legend-title {
-    font-size: 0.6rem;
-    letter-spacing: 0.25em;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--text-dim);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
   }
 
   .legend-item {
@@ -334,21 +348,24 @@
 
   /* INSTRUCTION */
   .instruction {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.25rem 1.5rem;
-    font-size: 0.7rem;
+    background: linear-gradient(135deg, rgba(232,160,192,0.08), rgba(168,136,200,0.08));
+    border: 1.5px solid var(--border);
+    padding: 1rem 1.25rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
     line-height: 1.7;
+    border-radius: 16px;
   }
 
-  .instruction strong { color: var(--accent); font-weight: 400; }
+  .instruction strong { color: var(--accent); font-weight: 600; }
 
   /* CALENDAR */
   .calendar-container {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
   }
 
   .calendar-header {
@@ -380,54 +397,57 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid transparent;
+    border: 1.5px solid transparent;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.18s;
     position: relative;
     font-size: 0.85rem;
-    border-radius: 2px;
+    border-radius: 50%;
     user-select: none;
+    font-family: 'DM Sans', sans-serif;
   }
 
-  .cal-cell:hover:not(.empty):not(.other-month) {
+  .cal-cell:hover:not(.empty) {
     border-color: var(--border);
     background: var(--surface2);
   }
 
-  .cal-cell.empty, .cal-cell.other-month {
+  .cal-cell.empty {
     cursor: default;
-    opacity: 0.2;
+    opacity: 0.15;
   }
 
   .cal-cell.today {
     border-color: var(--accent) !important;
+    background: rgba(196,120,154,0.08);
   }
 
-  .cal-cell.weekend .cal-date { color: var(--text-dim); }
+  .cal-cell.weekend .cal-date { color: var(--accent2); }
 
   .cal-date {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     line-height: 1;
+    font-weight: 400;
   }
 
   .cal-cell.hadir {
-    background: rgba(76, 175, 125, 0.12);
-    border-color: rgba(76, 175, 125, 0.3);
+    background: rgba(125,184,154,0.18);
+    border-color: rgba(125,184,154,0.5);
   }
 
   .cal-cell.lembur {
-    background: rgba(201, 168, 76, 0.12);
-    border-color: rgba(201, 168, 76, 0.35);
+    background: rgba(196,120,154,0.15);
+    border-color: rgba(196,120,154,0.45);
   }
 
   .cal-cell.libur {
-    background: rgba(91, 141, 217, 0.12);
-    border-color: rgba(91, 141, 217, 0.3);
+    background: rgba(143,168,212,0.18);
+    border-color: rgba(143,168,212,0.5);
   }
 
   .cal-cell.cuti {
-    background: rgba(176, 108, 196, 0.12);
-    border-color: rgba(176, 108, 196, 0.3);
+    background: rgba(168,136,200,0.18);
+    border-color: rgba(168,136,200,0.5);
   }
 
   .cal-cell.hadir .cal-date { color: var(--hadir); }
@@ -467,32 +487,42 @@
   /* CONTEXT MENU */
   .ctx-menu {
     position: fixed;
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
     z-index: 1000;
-    min-width: 160px;
+    min-width: 180px;
     display: none;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 32px rgba(196,120,154,0.18);
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 6px;
   }
 
-  .ctx-menu.show { display: block; }
+  .ctx-menu.show { display: block; animation: popIn 0.15s ease; }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
 
   .ctx-item {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.75rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.82rem;
     cursor: pointer;
-    letter-spacing: 0.05em;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    transition: background 0.1s;
+    gap: 0.65rem;
+    transition: background 0.12s;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
   }
 
-  .ctx-item:hover { background: var(--surface); }
-  .ctx-item .ctx-icon { font-size: 1rem; }
-  .ctx-item.danger { color: var(--red); }
-  .ctx-item.danger:hover { background: rgba(224,90,90,0.1); }
-  .ctx-divider { height: 1px; background: var(--border); }
+  .ctx-item:hover { background: var(--surface2); }
+  .ctx-item .ctx-icon { font-size: 0.9rem; }
+  .ctx-item.danger { color: #d4607a; }
+  .ctx-item.danger:hover { background: rgba(212,96,122,0.08); }
+  .ctx-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
   /* TOAST */
   .toast {
@@ -500,14 +530,17 @@
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%) translateY(4rem);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 0.75rem 1.5rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    padding: 0.7rem 1.4rem;
+    font-size: 0.8rem;
     z-index: 9999;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     white-space: nowrap;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
   }
 
   .toast.show { transform: translateX(-50%) translateY(0); }
@@ -537,11 +570,11 @@
 
   /* ANIMATION */
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  .calendar-grid { animation: fadeIn 0.3s ease; }
+  .calendar-grid { animation: fadeIn 0.25s ease; }
 </style>
 </head>
 <body>
@@ -585,7 +618,7 @@
 <!-- MAIN APP -->
 <div id="app">
   <header>
-    <div class="header-brand">✦ Absensi</div>
+    <div class="header-brand">✿ Absensi</div>
     <div class="header-right">
       <span class="user-info" id="user-email-display"></span>
       <button class="btn-logout" onclick="logout()">Keluar</button>
@@ -702,332 +735,4 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // STATE
 let currentUser = null
-let currentDate = new Date()
-let attendanceData = {} // { 'YYYY-MM-DD': 'hadir'|'lembur' }
-let selectedDate = null
-
-// ============================
-// AUTH
-// ============================
-async function login() {
-  const email = document.getElementById('email').value.trim()
-  const password = document.getElementById('password').value
-  if (!email || !password) return showAuthError('Isi semua kolom.')
-
-  const { data, error } = await db.auth.signInWithPassword({ email, password })
-  if (error) { dbg("ERROR", "login", "Login gagal", error); return showAuthError(error.message) }
-  dbg("INFO", "login", "Login berhasil: " + data.user.email)
-  onLogin(data.user)
-}
-
-async function register() {
-  const email = document.getElementById('reg-email').value.trim()
-  const password = document.getElementById('reg-password').value
-  if (!email || !password) return showAuthError('Isi semua kolom.')
-  if (password.length < 6) return showAuthError('Kata sandi minimal 6 karakter.')
-
-  const { data, error } = await db.auth.signUp({ email, password })
-  if (error) return showAuthError(error.message)
-  showAuthError('✓ Akun dibuat! Silakan masuk.')
-  showLogin()
-}
-
-async function logout() {
-  await db.auth.signOut()
-  currentUser = null
-  attendanceData = {}
-  document.getElementById('auth-screen').style.display = 'flex'
-  document.getElementById('app').style.display = 'none'
-}
-
-function showRegister() {
-  document.getElementById('login-form').style.display = 'none'
-  document.getElementById('register-form').style.display = 'block'
-  clearAuthError()
-}
-
-function showLogin() {
-  document.getElementById('login-form').style.display = 'block'
-  document.getElementById('register-form').style.display = 'none'
-  clearAuthError()
-}
-
-function showAuthError(msg) {
-  const el = document.getElementById('auth-error')
-  el.textContent = msg
-  el.style.display = 'block'
-}
-
-function clearAuthError() {
-  document.getElementById('auth-error').style.display = 'none'
-}
-
-function onLogin(user) {
-  dbg("INFO", "onLogin", "User masuk: " + user.email)
-  currentUser = user
-  document.getElementById('auth-screen').style.display = 'none'
-  document.getElementById('app').style.display = 'block'
-  document.getElementById('user-email-display').textContent = user.email
-  // Render kalender langsung tanpa tunggu Supabase
-  renderCalendar()
-  // Load data absensi di belakang layar
-  loadAttendance()
-}
-
-// ============================
-// DEBUG PANEL
-// ============================
-const debugLogs = []
-
-function dbg(level, context, message, detail = null) {
-  const time = new Date().toLocaleTimeString('id-ID')
-  const entry = { time, level, context, message, detail }
-  debugLogs.unshift(entry) // terbaru di atas
-  if (debugLogs.length > 50) debugLogs.pop()
-
-  const colors = { INFO: '#4caf7d', WARN: '#c9a84c', ERROR: '#e05a5a' }
-  const icons  = { INFO: '✓', WARN: '⚠', ERROR: '✕' }
-
-  const panel = document.getElementById('debug-panel')
-  if (!panel) return
-
-  panel.innerHTML = debugLogs.slice(0, 12).map(e => `
-    <div style="border-bottom:1px solid #2a2a32;padding:4px 0;color:${colors[e.level]}">
-      <span style="color:#7a7670;font-size:0.6rem">${e.time}</span>
-      <span style="margin:0 4px">${icons[e.level]}</span>
-      <span style="color:#e8e4dc">[${e.context}]</span> ${e.message}
-      ${e.detail ? `<div style="color:#7a7670;font-size:0.65rem;margin-left:1rem;word-break:break-all">${JSON.stringify(e.detail)}</div>` : ''}
-    </div>
-  `).join('')
-}
-
-function toggleDebug() {
-  const panel = document.getElementById('debug-panel')
-  const btn = document.getElementById('debug-toggle')
-  const visible = panel.style.display !== 'none'
-  panel.style.display = visible ? 'none' : 'block'
-  btn.textContent = visible ? '🐛' : '✕'
-}
-
-// ============================
-// DATABASE
-// ============================
-async function loadAttendance() {
-  // Periode: tgl 16 currentDate s/d 15 bulan berikutnya
-  const { start, end } = getPeriode()
-  const firstDay = start.toLocaleDateString('sv-SE')  // format YYYY-MM-DD aman
-  const lastDay = end.toLocaleDateString('sv-SE')
-
-  dbg('INFO', 'loadAttendance', `Memuat ${firstDay} s/d ${lastDay}`)
-
-  try {
-    const { data: sessionData, error: sessionError } = await db.auth.getSession()
-    if (sessionError) dbg('WARN', 'Auth', 'Gagal ambil session', sessionError)
-    else dbg('INFO', 'Auth', 'Session OK', { uid: sessionData?.session?.user?.id?.slice(0,8) + '...' })
-
-    const { data, error } = await db
-      .from('attendance')
-      .select('date, status')
-      .gte('date', firstDay)
-      .lte('date', lastDay)
-
-    if (error) {
-      dbg('ERROR', 'loadAttendance', 'Query gagal', error)
-      showToast('Gagal memuat data')
-      return
-    }
-
-    dbg('INFO', 'loadAttendance', `Berhasil: ${data?.length ?? 0} baris ditemukan`)
-    attendanceData = {}
-    if (data) data.forEach(row => { attendanceData[row.date] = row.status })
-    renderCalendar()
-  } catch(e) {
-    dbg('ERROR', 'loadAttendance', 'Exception', { msg: e.message })
-  }
-}
-
-async function saveAttendance(dateStr, status) {
-  dbg('INFO', 'saveAttendance', `${dateStr} → ${status ?? 'hapus'}`)
-
-  if (status === null) {
-    const { error } = await db
-      .from('attendance')
-      .delete()
-      .eq('user_id', currentUser.id)
-      .eq('date', dateStr)
-    if (error) {
-      dbg('ERROR', 'saveAttendance', 'Gagal hapus', error)
-      showToast('Gagal menghapus')
-      return
-    }
-    dbg('INFO', 'saveAttendance', 'Hapus berhasil')
-    delete attendanceData[dateStr]
-  } else {
-    const { error } = await db
-      .from('attendance')
-      .upsert({ user_id: currentUser.id, date: dateStr, status }, { onConflict: 'user_id,date' })
-    if (error) {
-      dbg('ERROR', 'saveAttendance', 'Gagal simpan', error)
-      showToast('Gagal menyimpan')
-      return
-    }
-    dbg('INFO', 'saveAttendance', 'Simpan berhasil')
-    attendanceData[dateStr] = status
-  }
-  renderCalendar()
-  updateStats()
-}
-
-// ============================
-// CALENDAR RENDER
-// ============================
-const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
-
-function renderCalendar() {
-  const today = new Date()
-  const { start, end } = getPeriode()
-
-  // Label periode di header
-  const MONTHS_ID_SHORT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
-  const label = `${start.getDate()} ${MONTHS_ID_SHORT[start.getMonth()]} — ${end.getDate()} ${MONTHS_ID_SHORT[end.getMonth()]} ${end.getFullYear()}`
-  document.getElementById('month-label').textContent = label
-
-  const grid = document.getElementById('calendar-grid')
-  grid.innerHTML = ''
-
-  // Isi sel kosong sebelum tgl 16 (sesuai hari dalam minggu)
-  const startDow = start.getDay() // 0=Min, 6=Sab
-  for (let i = 0; i < startDow; i++) {
-    const cell = document.createElement('div')
-    cell.className = 'cal-cell empty'
-    grid.appendChild(cell)
-  }
-
-  // Loop dari tgl 16 s/d tgl 15 bulan depan
-  let cursor = new Date(start)
-  while (cursor <= end) {
-    const y = cursor.getFullYear()
-    const m = cursor.getMonth()
-    const d = cursor.getDate()
-    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-    const dayOfWeek = cursor.getDay()
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
-    const isToday = today.getFullYear() === y && today.getMonth() === m && today.getDate() === d
-    const status = attendanceData[dateStr]
-
-    // Label tanggal: tampilkan nama bulan singkat saat ganti bulan
-    const isFirstOfMonth = d === 1
-    const dateLabel = isFirstOfMonth ? `<span style="font-size:0.5rem;color:var(--accent);display:block;line-height:1">${MONTHS_ID_SHORT[m]}</span>${d}` : d
-
-    const cell = document.createElement('div')
-    cell.className = `cal-cell${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${status ? ' ' + status : ''}`
-    cell.innerHTML = `<span class="cal-date" style="text-align:center">${dateLabel}</span>${status ? '<div class="cal-dot"></div>' : ''}`
-
-    cell.addEventListener('click', (e) => { e.stopPropagation(); openMenu(e, dateStr) })
-    cell.addEventListener('contextmenu', (e) => { e.preventDefault(); openMenu(e, dateStr) })
-
-    grid.appendChild(cell)
-    cursor.setDate(cursor.getDate() + 1)
-  }
-
-  updateStats()
-}
-
-function getPeriode() {
-  // Periode: tgl 16 bulan currentDate s/d 15 bulan berikutnya
-  const y = currentDate.getFullYear()
-  const m = currentDate.getMonth()
-  const start = new Date(y, m, 16)
-  const end = new Date(y, m + 1, 15)
-  return { start, end }
-}
-
-function updateStats() {
-  const periodeVals = Object.values(attendanceData)
-
-  const hadir = periodeVals.filter(v => v === 'hadir').length
-  const lembur = periodeVals.filter(v => v === 'lembur').length
-  const libur = periodeVals.filter(v => v === 'libur').length
-  const cuti = periodeVals.filter(v => v === 'cuti').length
-
-  document.getElementById('stat-hadir').textContent = hadir + lembur
-  document.getElementById('stat-lembur').textContent = lembur
-  document.getElementById('stat-libur').textContent = libur
-  document.getElementById('stat-cuti').textContent = cuti
-
-  // Label periode di stat sidebar
-  const { start: ps, end: pe } = getPeriode()
-  const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
-  document.getElementById('stat-periode').textContent = `${ps.getDate()} ${MN[ps.getMonth()]} — ${pe.getDate()} ${MN[pe.getMonth()]} ${pe.getFullYear()}`
-}
-
-async function changePeriode(dir) {
-  currentDate.setMonth(currentDate.getMonth() + dir)
-  attendanceData = {}
-  renderCalendar()
-  await loadAttendance()
-}
-
-// ============================
-// CONTEXT MENU
-// ============================
-function openMenu(e, dateStr) {
-  e.preventDefault()
-  selectedDate = dateStr
-  const menu = document.getElementById('ctx-menu')
-  menu.classList.add('show')
-
-  let x = e.clientX, y = e.clientY
-  if (x + 180 > window.innerWidth) x = window.innerWidth - 185
-  if (y + 120 > window.innerHeight) y = window.innerHeight - 125
-  menu.style.left = x + 'px'
-  menu.style.top = y + 'px'
-}
-
-function closeMenu() {
-  document.getElementById('ctx-menu').classList.remove('show')
-}
-
-async function setStatus(status) {
-  if (!selectedDate) return
-  closeMenu()
-  await saveAttendance(selectedDate, status)
-  const labels = { hadir: 'Ditandai: Hadir', lembur: 'Ditandai: Lembur', libur: 'Ditandai: Libur Resmi', cuti: 'Ditandai: Izin/Cuti/Sakit' }
-  showToast(status ? labels[status] : 'Tanda dihapus')
-}
-
-document.addEventListener('click', (e) => {
-  if (!document.getElementById('ctx-menu').contains(e.target)) closeMenu()
-})
-
-// ============================
-// TOAST
-// ============================
-let toastTimer
-function showToast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg
-  t.classList.add('show')
-  clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500)
-}
-
-// ============================
-// INIT: CEK SESSION
-// ============================
-db.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
-    onLogin(session.user)
-  }
-})
-
-// Keyboard enter
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    if (document.getElementById('register-form').style.display !== 'none') register()
-    else login()
-  }
-})
-</script>
-</body>
-</html>
+let curre
