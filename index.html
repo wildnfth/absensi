@@ -634,6 +634,14 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- DEBUG PANEL -->
+<button id="debug-toggle" onclick="toggleDebug()" style="position:fixed;bottom:1.5rem;right:1.5rem;background:#1a1a1f;border:1px solid #2a2a32;color:#7a7670;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;z-index:9998;display:flex;align-items:center;justify-content:center;">🐛</button>
+
+<div id="debug-panel" style="display:none;position:fixed;bottom:4rem;right:1rem;width:min(380px,95vw);max-height:300px;overflow-y:auto;background:#0d0d0f;border:1px solid #2a2a32;padding:0.75rem 1rem;font-family:DM Mono,monospace;font-size:0.7rem;z-index:9997;">
+  <div style="color:#c9a84c;font-size:0.6rem;letter-spacing:0.2em;margin-bottom:0.5rem">DEBUG LOG ✦</div>
+  <div style="color:#7a7670;font-size:0.65rem">Belum ada log.</div>
+</div>
+
 <script>
 // ============================
 // KONFIGURASI SUPABASE
@@ -660,7 +668,9 @@ async function login() {
   if (!email || !password) return showAuthError('Isi semua kolom.')
 
   const { data, error } = await db.auth.signInWithPassword({ email, password })
-  if (error) return showAuthError(error.message)
+  if (error) { dbg("ERROR", "login", "Login gagal", error); return showAuthError(error.message) }
+  dbg("INFO", "login", "Login berhasil: " + data.user.email)
+  onLogin(data.user)
   onLogin(data.user)
 }
 
@@ -706,7 +716,8 @@ function clearAuthError() {
   document.getElementById('auth-error').style.display = 'none'
 }
 
-function onLogin(user) {
+  dbg("INFO", "onLogin", "User masuk: " + user.email)
+  currentUser = user
   currentUser = user
   document.getElementById('auth-screen').style.display = 'none'
   document.getElementById('app').style.display = 'block'
@@ -715,6 +726,41 @@ function onLogin(user) {
   renderCalendar()
   // Load data absensi di belakang layar
   loadAttendance()
+}
+
+// ============================
+// DEBUG PANEL
+// ============================
+const debugLogs = []
+
+function dbg(level, context, message, detail = null) {
+  const time = new Date().toLocaleTimeString('id-ID')
+  const entry = { time, level, context, message, detail }
+  debugLogs.unshift(entry) // terbaru di atas
+  if (debugLogs.length > 50) debugLogs.pop()
+
+  const colors = { INFO: '#4caf7d', WARN: '#c9a84c', ERROR: '#e05a5a' }
+  const icons  = { INFO: '✓', WARN: '⚠', ERROR: '✕' }
+
+  const panel = document.getElementById('debug-panel')
+  if (!panel) return
+
+  panel.innerHTML = debugLogs.slice(0, 12).map(e => `
+    <div style="border-bottom:1px solid #2a2a32;padding:4px 0;color:${colors[e.level]}">
+      <span style="color:#7a7670;font-size:0.6rem">${e.time}</span>
+      <span style="margin:0 4px">${icons[e.level]}</span>
+      <span style="color:#e8e4dc">[${e.context}]</span> ${e.message}
+      ${e.detail ? `<div style="color:#7a7670;font-size:0.65rem;margin-left:1rem;word-break:break-all">${JSON.stringify(e.detail)}</div>` : ''}
+    </div>
+  `).join('')
+}
+
+function toggleDebug() {
+  const panel = document.getElementById('debug-panel')
+  const btn = document.getElementById('debug-toggle')
+  const visible = panel.style.display !== 'none'
+  panel.style.display = visible ? 'none' : 'block'
+  btn.textContent = visible ? '🐛' : '✕'
 }
 
 // ============================
@@ -727,10 +773,12 @@ async function loadAttendance() {
   const lastDayNum = new Date(year, month, 0).getDate()
   const lastDay = `${year}-${String(month).padStart(2,'0')}-${String(lastDayNum).padStart(2,'0')}`
 
+  dbg('INFO', 'loadAttendance', `Memuat ${firstDay} s/d ${lastDay}`)
+
   try {
-    // Ambil session terbaru langsung dari Supabase
-    const { data: sessionData } = await db.auth.getSession()
-    console.log('Session saat load:', sessionData?.session?.user?.id)
+    const { data: sessionData, error: sessionError } = await db.auth.getSession()
+    if (sessionError) dbg('WARN', 'Auth', 'Gagal ambil session', sessionError)
+    else dbg('INFO', 'Auth', 'Session OK', { uid: sessionData?.session?.user?.id?.slice(0,8) + '...' })
 
     const { data, error } = await db
       .from('attendance')
@@ -738,34 +786,47 @@ async function loadAttendance() {
       .gte('date', firstDay)
       .lte('date', lastDay)
 
-    console.log('Data dari Supabase:', data, 'Error:', error)
+    if (error) {
+      dbg('ERROR', 'loadAttendance', 'Query gagal', error)
+      showToast('Gagal memuat data')
+      return
+    }
 
-    if (error) { alert('ERROR: ' + JSON.stringify(error)); showToast('Gagal memuat data'); return }
-
+    dbg('INFO', 'loadAttendance', `Berhasil: ${data?.length ?? 0} baris ditemukan`)
     attendanceData = {}
     if (data) data.forEach(row => { attendanceData[row.date] = row.status })
     renderCalendar()
   } catch(e) {
-    console.error('Koneksi gagal:', e)
+    dbg('ERROR', 'loadAttendance', 'Exception', { msg: e.message })
   }
 }
 
 async function saveAttendance(dateStr, status) {
+  dbg('INFO', 'saveAttendance', `${dateStr} → ${status ?? 'hapus'}`)
+
   if (status === null) {
-    // DELETE
     const { error } = await db
       .from('attendance')
       .delete()
       .eq('user_id', currentUser.id)
       .eq('date', dateStr)
-    if (error) { showToast('Gagal menghapus'); return }
+    if (error) {
+      dbg('ERROR', 'saveAttendance', 'Gagal hapus', error)
+      showToast('Gagal menghapus')
+      return
+    }
+    dbg('INFO', 'saveAttendance', 'Hapus berhasil')
     delete attendanceData[dateStr]
   } else {
-    // UPSERT
     const { error } = await db
       .from('attendance')
       .upsert({ user_id: currentUser.id, date: dateStr, status }, { onConflict: 'user_id,date' })
-    if (error) { showToast('Gagal menyimpan'); return }
+    if (error) {
+      dbg('ERROR', 'saveAttendance', 'Gagal simpan', error)
+      showToast('Gagal menyimpan')
+      return
+    }
+    dbg('INFO', 'saveAttendance', 'Simpan berhasil')
     attendanceData[dateStr] = status
   }
   renderCalendar()
