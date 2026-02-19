@@ -566,6 +566,84 @@ header {
   white-space: nowrap;
 }
 
+/* Estimasi Gaji Card */
+.gaji-card {
+  background: var(--md-surface-container-lowest);
+  border: 1.5px solid var(--md-outline-variant);
+  border-radius: var(--shape-xl);
+  padding: 1.1rem 1.25rem;
+}
+
+.gaji-title {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+  margin-bottom: 0.85rem;
+}
+
+.gaji-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.3rem 0;
+}
+
+.gaji-row-label {
+  font-size: 0.8125rem;
+  color: var(--md-on-surface-variant);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.gaji-row-label .g-chip {
+  font-size: 0.65rem;
+  font-family: 'Google Sans', sans-serif;
+  font-weight: 600;
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--shape-full);
+  opacity: 0.9;
+}
+
+.gaji-row-val {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--md-on-surface);
+  letter-spacing: -0.01em;
+}
+
+.gaji-divider {
+  height: 1px;
+  background: var(--md-outline-variant);
+  margin: 0.5rem 0;
+}
+
+.gaji-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 0.2rem;
+}
+
+.gaji-total-label {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-on-surface);
+}
+
+.gaji-total-val {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--md-primary);
+  letter-spacing: -0.02em;
+}
+
 /* M3 Info Card */
 .info-card {
   background: var(--md-secondary-container);
@@ -1108,6 +1186,33 @@ header {
         </div>
       </div>
 
+      <div class="gaji-card">
+        <div class="gaji-title">Estimasi Gaji</div>
+
+        <div class="gaji-row">
+          <span class="gaji-row-label">
+            <span class="g-chip" style="background:var(--c-hadir-bg);color:var(--c-hadir)">Makan</span>
+            <span id="gaji-makan-detail" style="font-size:0.75rem;opacity:0.7"></span>
+          </span>
+          <span class="gaji-row-val" id="gaji-makan">Rp 0</span>
+        </div>
+
+        <div class="gaji-row">
+          <span class="gaji-row-label">
+            <span class="g-chip" style="background:var(--c-lembur-bg);color:var(--c-lembur)">Lembur</span>
+            <span id="gaji-lembur-detail" style="font-size:0.75rem;opacity:0.7"></span>
+          </span>
+          <span class="gaji-row-val" id="gaji-lembur-val">Rp 0</span>
+        </div>
+
+        <div class="gaji-divider"></div>
+
+        <div class="gaji-total-row">
+          <span class="gaji-total-label">Total Estimasi</span>
+          <span class="gaji-total-val" id="gaji-total">Rp 0</span>
+        </div>
+      </div>
+
       <div class="legend-card">
         <div class="legend-title">Keterangan</div>
         <div class="leg-item">
@@ -1521,20 +1626,47 @@ function renderCalendar() {
   updateStats()
 }
 
+const UANG_MAKAN  = 40000   // per hari hadir (hadir + lembur)
+const UANG_LEMBUR = 50000   // per kali lembur
+
+function formatRp(n) {
+  return 'Rp ' + n.toLocaleString('id-ID')
+}
+
 function updateStats() {
   const entries = Object.values(attendanceData)
   const statuses = entries.map(e => e?.status ?? e)
-  // Lembur: total kali (sum lembur_count), bukan jumlah hari
+
+  // Hitung hari masuk (hadir + lembur)
+  const hariHadir  = statuses.filter(s => s === 'hadir').length
+  const hariLembur = statuses.filter(s => s === 'lembur').length
+  const totalMasuk = hariHadir + hariLembur
+
+  // Lembur: total kali (sum lembur_count)
   const totalLembur = entries
     .filter(e => e?.status === 'lembur')
     .reduce((sum, e) => sum + (e.lembur_count ?? 1), 0)
-  document.getElementById('stat-hadir').textContent  = statuses.filter(s=>s==='hadir').length + statuses.filter(s=>s==='lembur').length
+
+  document.getElementById('stat-hadir').textContent  = totalMasuk
   document.getElementById('stat-lembur').textContent = totalLembur
-  document.getElementById('stat-libur').textContent  = statuses.filter(s=>'libur'===s).length
-  document.getElementById('stat-cuti').textContent   = statuses.filter(s=>'cuti'===s).length
+  document.getElementById('stat-libur').textContent  = statuses.filter(s => s === 'libur').length
+  document.getElementById('stat-cuti').textContent   = statuses.filter(s => s === 'cuti').length
+
   const { start, end } = getPeriode()
   document.getElementById('stat-periode').textContent =
     `${start.getDate()} ${MN[start.getMonth()]} — ${end.getDate()} ${MN[end.getMonth()]} ${end.getFullYear()}`
+
+  // ── Estimasi Gaji ──
+  const nilaiMakan  = totalMasuk  * UANG_MAKAN
+  const nilaiLembur = totalLembur * UANG_LEMBUR
+  const total       = nilaiMakan + nilaiLembur
+
+  document.getElementById('gaji-makan').textContent        = formatRp(nilaiMakan)
+  document.getElementById('gaji-makan-detail').textContent = totalMasuk > 0 ? `${totalMasuk}× 40rb` : ''
+  document.getElementById('gaji-lembur-val').textContent   = formatRp(nilaiLembur)
+  document.getElementById('gaji-lembur-detail').textContent= totalLembur > 0 ? `${totalLembur}× 50rb` : ''
+  document.getElementById('gaji-total').textContent        = formatRp(total)
+
   renderNotesPanel()
 }
 
