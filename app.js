@@ -195,15 +195,14 @@ async function loadWithdrawals() {
   updateWithdrawalStats()
 }
 
-async function saveWithdrawal(amount, note) {
-  const today = new Date().toLocaleDateString('sv-SE')
+async function saveWithdrawal(amount, note, date) {
   const { start } = getPeriode()
   const periodeStartStr = start.toLocaleDateString('sv-SE')
   const { data, error } = await db.from('withdrawals').insert({
     user_id: currentUser.id,
     amount,
     note: note || null,
-    withdrawn_at: today,
+    withdrawn_at: date || new Date().toLocaleDateString('sv-SE'),
     periode_start: periodeStartStr
   }).select().single()
   if (error) { dbg('ERROR','withdrawals','Simpan gagal',error); showToast('Gagal menyimpan tarikan'); return }
@@ -501,6 +500,7 @@ function openTarikDialog() {
   const MN_FULL = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
   document.getElementById('tarik-dialog-periode').textContent =
     `${start.getDate()} ${MN_FULL[start.getMonth()]} — ${end.getDate()} ${MN_FULL[end.getMonth()]} ${end.getFullYear()}`
+  document.getElementById('tarik-date').value   = new Date().toLocaleDateString('sv-SE')
   document.getElementById('tarik-amount').value = ''
   document.getElementById('tarik-note').value   = ''
   document.getElementById('tarik-preview').textContent = ''
@@ -524,9 +524,10 @@ function updateTarikPreview() {
 async function confirmTarik() {
   const amount = parseInt(document.getElementById('tarik-amount').value)
   if (!amount || amount <= 0) { showToast('Masukkan jumlah yang valid'); return }
+  const date = document.getElementById('tarik-date').value || new Date().toLocaleDateString('sv-SE')
   const note = document.getElementById('tarik-note').value.trim()
   closeTarikDialog()
-  await saveWithdrawal(amount, note)
+  await saveWithdrawal(amount, note, date)
 }
 
 document.getElementById('tarik-dialog').addEventListener('click', e => {
