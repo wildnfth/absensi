@@ -431,13 +431,16 @@ function showNotePanel() { renderNotesPanel() }
 document.addEventListener('scroll', () => {
   const menu = document.getElementById('ctx-menu')
   if (!menu.classList.contains('show') || !menu._anchorCell) return
-  const rect = menu._anchorCell.getBoundingClientRect()
+  const rect       = menu._anchorCell.getBoundingClientRect()
+  const headerH    = document.querySelector('header')?.offsetHeight || 64
+  // Tutup menu jika sel sudah tersembunyi di balik header
+  if (rect.bottom < headerH) { closeMenu(); return }
   const menuW = 210, menuH = 240
   let x = rect.left + menu._offsetX
   let y = rect.bottom + menu._offsetY
   if (x + menuW > window.innerWidth)  x = rect.right - menuW
   if (y + menuH > window.innerHeight) y = rect.top - menuH - 4
-  if (y < 0) y = rect.bottom + 4
+  if (y < headerH + 4) y = rect.bottom + 4   // jangan naik ke bawah header
   menu.style.left = x + 'px'
   menu.style.top  = y + 'px'
 }, true)
