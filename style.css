@@ -718,6 +718,75 @@ header {
 
 .note-empty { font-style: italic; opacity: 0.55; font-size: 0.8125rem; color: var(--md-on-surface-variant); }
 
+/* Tarik Uang Makan Button */
+.tarik-btn {
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.6rem 1rem;
+  border: 1.5px dashed var(--md-outline-variant);
+  border-radius: var(--shape-full);
+  background: transparent;
+  color: var(--md-primary);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  letter-spacing: 0.02em;
+}
+.tarik-btn:hover {
+  background: rgba(139,74,107,0.06);
+  border-color: var(--md-primary);
+}
+
+/* History Tarikan */
+.history-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--shape-md);
+  background: #FFF3E0;
+  margin-bottom: 0.4rem;
+  gap: 0.5rem;
+}
+.history-entry:last-child { margin-bottom: 0; }
+.history-entry-left { flex: 1; min-width: 0; }
+.history-entry-date {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #E65100;
+  margin-bottom: 0.1rem;
+}
+.history-entry-note {
+  font-size: 0.75rem;
+  color: var(--md-on-surface-variant);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.history-entry-amount {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #E65100;
+  white-space: nowrap;
+}
+.history-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--md-on-surface-variant);
+  opacity: 0.5;
+  font-size: 0.9rem;
+  padding: 0.1rem 0.2rem;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+}
+.history-delete-btn:hover { opacity: 1; color: #B3261E; }
+
 /* Periode Settings */
 .periode-stepper {
   display: flex;
