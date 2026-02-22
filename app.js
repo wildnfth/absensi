@@ -7,6 +7,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 let currentUser    = null
 let currentDate    = new Date()
 let attendanceData = {}
+let withdrawalData = []   // tarikan uang makan periode ini
 let selectedDate   = null
 let periodeStart   = 16   // tanggal mulai
 let periodeEnd     = 15   // tanggal akhir (bulan berikutnya jika < periodeStart)
@@ -156,6 +157,7 @@ async function loadAttendance() {
     attendanceData = {}
     data?.forEach(r => { attendanceData[r.date] = { status: r.status, note: r.note || '', lembur_count: r.lembur_count ?? null } })
     renderCalendar()
+    await loadWithdrawals()
   } catch(e) { dbg('ERROR','load','Exception',{msg:e.message}) }
 }
 
@@ -175,6 +177,66 @@ async function saveAttendance(dateStr, status, note = '', lembur_count = null) {
   dbg('INFO','save','OK')
   renderCalendar()
   updateStats()
+}
+
+// ── WITHDRAWALS ──
+async function loadWithdrawals() {
+  const { start, end } = getPeriode()
+  const from = start.toLocaleDateString('sv-SE')
+  const to   = end.toLocaleDateString('sv-SE')
+  const { data, error } = await db.from('withdrawals')
+    .select('id,amount,note,withdrawn_at')
+    .gte('withdrawn_at', from)
+    .lte('withdrawn_at', to)
+    .order('withdrawn_at', { ascending: false })
+  if (error) { dbg('ERROR','withdrawals','Load gagal',error); return }
+  withdrawalData = data || []
+  dbg('INFO','withdrawals',`${withdrawalData.length} tarikan`)
+  updateWithdrawalStats()
+}
+
+async function saveWithdrawal(amount, note) {
+  const today = new Date().toLocaleDateString('sv-SE')
+  const { start } = getPeriode()
+  const periodeStartStr = start.toLocaleDateString('sv-SE')
+  const { data, error } = await db.from('withdrawals').insert({
+    user_id: currentUser.id,
+    amount,
+    note: note || null,
+    withdrawn_at: today,
+    periode_start: periodeStartStr
+  }).select().single()
+  if (error) { dbg('ERROR','withdrawals','Simpan gagal',error); showToast('Gagal menyimpan tarikan'); return }
+  withdrawalData.unshift(data)
+  updateWithdrawalStats()
+  showToast(`Tarikan ${formatRp(amount)} dicatat`)
+}
+
+async function deleteWithdrawal(id) {
+  const { error } = await db.from('withdrawals').delete().eq('id', id)
+  if (error) { showToast('Gagal menghapus'); return }
+  withdrawalData = withdrawalData.filter(w => w.id !== id)
+  updateWithdrawalStats()
+  renderHistoryList()
+  showToast('Tarikan dihapus')
+}
+
+function updateWithdrawalStats() {
+  const totalTarik = withdrawalData.reduce((sum, w) => sum + w.amount, 0)
+  const nilaiMakan = parseInt(document.getElementById('gaji-makan').textContent.replace(/[^0-9]/g,'')) || 0
+
+  // Hitung dari updateStats agar sinkron
+  const entries  = Object.values(attendanceData)
+  const statuses = entries.map(e => e?.status ?? e)
+  const totalMasuk = statuses.filter(s => s === 'hadir').length + statuses.filter(s => s === 'lembur').length
+  const makan = totalMasuk * UANG_MAKAN
+  const sisa  = makan - totalTarik
+
+  const tarikCount = withdrawalData.length
+  document.getElementById('gaji-tarik').textContent       = formatRp(totalTarik)
+  document.getElementById('gaji-tarik-detail').textContent = tarikCount > 0 ? `${tarikCount}× tarikan` : ''
+  document.getElementById('gaji-sisa').textContent        = formatRp(Math.max(0, sisa))
+  document.getElementById('gaji-sisa').style.color        = sisa < 0 ? '#B3261E' : '#2E7D32'
 }
 
 // ── CALENDAR ──
@@ -269,12 +331,15 @@ function updateStats() {
   document.getElementById('gaji-lembur-detail').textContent= totalLembur > 0 ? `${totalLembur}× 50rb` : ''
   document.getElementById('gaji-total').textContent        = formatRp(total)
 
+  updateWithdrawalStats()
   renderNotesPanel()
 }
 
 async function changePeriode(dir) {
   currentDate.setMonth(currentDate.getMonth() + dir)
   attendanceData = {}
+  withdrawalData = []
+  updateWithdrawalStats()
   renderCalendar()
   await loadAttendance()
 }
@@ -429,6 +494,86 @@ async function confirmCuti() {
   await saveAttendance(dateToSave, 'cuti', note)
   showToast('Ditandai: Izin/Cuti/Sakit')
 }
+
+// ── TARIK UANG MAKAN ──
+function openTarikDialog() {
+  const { start, end } = getPeriode()
+  const MN_FULL = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  document.getElementById('tarik-dialog-periode').textContent =
+    `${start.getDate()} ${MN_FULL[start.getMonth()]} — ${end.getDate()} ${MN_FULL[end.getMonth()]} ${end.getFullYear()}`
+  document.getElementById('tarik-amount').value = ''
+  document.getElementById('tarik-note').value   = ''
+  document.getElementById('tarik-preview').textContent = ''
+  document.getElementById('tarik-dialog').classList.add('show')
+  setTimeout(() => document.getElementById('tarik-amount').focus(), 200)
+}
+
+function closeTarikDialog() {
+  document.getElementById('tarik-dialog').classList.remove('show')
+}
+
+function updateTarikPreview() {
+  const val = parseInt(document.getElementById('tarik-amount').value) || 0
+  const el  = document.getElementById('tarik-preview')
+  if (val <= 0) { el.textContent = ''; return }
+  // Berapa hari makan setara
+  const hari = Math.round(val / UANG_MAKAN * 10) / 10
+  el.textContent = `≈ ${hari} hari uang makan`
+}
+
+async function confirmTarik() {
+  const amount = parseInt(document.getElementById('tarik-amount').value)
+  if (!amount || amount <= 0) { showToast('Masukkan jumlah yang valid'); return }
+  const note = document.getElementById('tarik-note').value.trim()
+  closeTarikDialog()
+  await saveWithdrawal(amount, note)
+}
+
+document.getElementById('tarik-dialog').addEventListener('click', e => {
+  if (e.target === document.getElementById('tarik-dialog')) closeTarikDialog()
+})
+
+// ── HISTORY TARIKAN ──
+function openHistoryDialog() {
+  const { start, end } = getPeriode()
+  const MN_FULL = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  document.getElementById('history-dialog-periode').textContent =
+    `${start.getDate()} ${MN_FULL[start.getMonth()]} — ${end.getDate()} ${MN_FULL[end.getMonth()]} ${end.getFullYear()}`
+  renderHistoryList()
+  document.getElementById('history-dialog').classList.add('show')
+}
+
+function closeHistoryDialog() {
+  document.getElementById('history-dialog').classList.remove('show')
+}
+
+function renderHistoryList() {
+  const el = document.getElementById('history-list')
+  if (!withdrawalData.length) {
+    el.innerHTML = '<span class="note-empty">Belum ada tarikan periode ini</span>'
+    return
+  }
+  const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  el.innerHTML = withdrawalData.map(w => {
+    const d   = new Date(w.withdrawn_at + 'T00:00:00')
+    const tgl = `${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()}`
+    const note = w.note ? `<div class="history-entry-note">${w.note}</div>` : ''
+    return `<div class="history-entry">
+      <div class="history-entry-left">
+        <div class="history-entry-date">${tgl}</div>
+        ${note}
+      </div>
+      <div style="display:flex;align-items:center;gap:0.4rem">
+        <span class="history-entry-amount">${formatRp(w.amount)}</span>
+        <button class="history-delete-btn" onclick="deleteWithdrawal('${w.id}')" title="Hapus">✕</button>
+      </div>
+    </div>`
+  }).join('')
+}
+
+document.getElementById('history-dialog').addEventListener('click', e => {
+  if (e.target === document.getElementById('history-dialog')) closeHistoryDialog()
+})
 
 // ── SHOW / HIDE PASSWORD ──
 function togglePw(inputId, btn) {
