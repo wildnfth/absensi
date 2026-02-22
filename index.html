@@ -128,6 +128,7 @@
       <div class="gaji-card">
         <div class="gaji-title">Estimasi Gaji</div>
 
+        <!-- Uang Makan Hadir -->
         <div class="gaji-row">
           <span class="gaji-row-label">
             <span class="g-chip" style="background:var(--c-hadir-bg);color:var(--c-hadir)">Makan</span>
@@ -136,6 +137,24 @@
           <span class="gaji-row-val" id="gaji-makan">Rp 0</span>
         </div>
 
+        <!-- Uang Makan Ditarik -->
+        <div class="gaji-row">
+          <span class="gaji-row-label">
+            <span class="g-chip" style="background:#FFF3E0;color:#E65100;cursor:pointer" onclick="openHistoryDialog()" title="Lihat history">Ditarik ›</span>
+            <span id="gaji-tarik-detail" style="font-size:0.75rem;opacity:0.7"></span>
+          </span>
+          <span class="gaji-row-val" id="gaji-tarik" style="color:#E65100">Rp 0</span>
+        </div>
+
+        <!-- Sisa Uang Makan -->
+        <div class="gaji-row" id="gaji-sisa-row">
+          <span class="gaji-row-label">
+            <span class="g-chip" style="background:#E8F5E9;color:#2E7D32">Sisa</span>
+          </span>
+          <span class="gaji-row-val" id="gaji-sisa" style="color:#2E7D32">Rp 0</span>
+        </div>
+
+        <!-- Uang Lembur -->
         <div class="gaji-row">
           <span class="gaji-row-label">
             <span class="g-chip" style="background:var(--c-lembur-bg);color:var(--c-lembur)">Lembur</span>
@@ -150,6 +169,11 @@
           <span class="gaji-total-label">Total Estimasi</span>
           <span class="gaji-total-val" id="gaji-total">Rp 0</span>
         </div>
+
+        <!-- Tombol Tarik Uang Makan -->
+        <button class="tarik-btn" onclick="openTarikDialog()">
+          + Catat Tarikan Uang Makan
+        </button>
       </div>
 
       <div class="legend-card">
@@ -202,6 +226,42 @@
     </div>
     <div class="dialog-actions">
       <button class="dialog-btn-filled" onclick="confirmUsername()" style="width:100%">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tarik Uang Makan Dialog -->
+<div class="dialog-scrim" id="tarik-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">💵</div>
+    <div class="dialog-title">Catat Tarikan</div>
+    <div class="dialog-subtitle" id="tarik-dialog-periode">—</div>
+    <div class="dialog-field" style="margin-top:1rem">
+      <label style="font-family:'Google Sans',sans-serif;font-size:0.75rem;font-weight:500;color:var(--md-on-surface-variant);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:0.5rem">Jumlah (Rp)</label>
+      <input type="number" id="tarik-amount" placeholder="Contoh: 280000"
+        style="width:100%;padding:0.75rem 1rem;border:1.5px solid var(--md-outline-variant);border-radius:var(--shape-md);font-family:'Google Sans Display',sans-serif;font-size:1.5rem;color:var(--md-primary);background:var(--md-surface-container);outline:none;-moz-appearance:textfield"
+        oninput="updateTarikPreview()">
+      <div id="tarik-preview" style="font-size:0.75rem;color:var(--md-on-surface-variant);margin-top:0.4rem;min-height:1rem"></div>
+    </div>
+    <div class="dialog-field">
+      <textarea id="tarik-note" placeholder="Catatan opsional..." rows="2" style="resize:none;min-height:56px;max-height:56px"></textarea>
+    </div>
+    <div class="dialog-actions">
+      <button class="dialog-btn-text" onclick="closeTarikDialog()">Batal</button>
+      <button class="dialog-btn-filled" onclick="confirmTarik()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- History Tarikan Dialog -->
+<div class="dialog-scrim" id="history-dialog">
+  <div class="dialog" style="max-width:380px">
+    <div class="dialog-icon">📋</div>
+    <div class="dialog-title">History Tarikan</div>
+    <div class="dialog-subtitle" id="history-dialog-periode">—</div>
+    <div id="history-list" style="max-height:300px;overflow-y:auto;margin-top:0.75rem"></div>
+    <div class="dialog-actions" style="justify-content:center">
+      <button class="dialog-btn-filled" onclick="closeHistoryDialog()" style="width:100%">Tutup</button>
     </div>
   </div>
 </div>
